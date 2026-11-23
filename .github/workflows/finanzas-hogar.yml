@@ -61,7 +61,8 @@ jobs:
           test -s Mis-Finanzas.apk
           "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging Mis-Finanzas.apk | grep -E '^package:|^application-label:|^application-icon-'
           "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging Mis-Finanzas.apk | grep -q "application-label:'Mis Finanzas'"
-          unzip -l Mis-Finanzas.apk | grep 'ic_launcher' | head -15
+          unzip -l Mis-Finanzas.apk | grep -E 'mis_finanzas_launcher|mis_finanzas_foreground' | head -20
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging Mis-Finanzas.apk | grep 'application-icon-' | grep -q 'mis_finanzas_launcher'
       - name: Publicar APK en Releases
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
