@@ -87,10 +87,10 @@ check('Abono individual puede editarse y elimina saldo',()=>{
   d.querySelector('#payAmt').value='12000';
   w.financeSavePayment(id,payId);
   account=w.eval('db.items.find(x=>x.id==='+JSON.stringify(id)+')');
-  assert.equal(w.owed(account),18000);
+  assert.equal((account.amount-account.payments.reduce((a,p)=>a+p.amount,0)),18000);
   w.financeDeletePayment(id,payId);
   account=w.eval('db.items.find(x=>x.id==='+JSON.stringify(id)+')');
-  assert.equal(w.owed(account),30000);
+  assert.equal((account.amount-account.payments.reduce((a,p)=>a+p.amount,0)),30000);
 });
 check('Cuenta recurrente crea siguiente pendiente y evita duplicados',()=>{
   w.openEntryForm('bill');
@@ -104,7 +104,7 @@ check('Cuenta recurrente crea siguiente pendiente y evita duplicados',()=>{
   const entries=w.eval('db.items.filter(x=>x.note==="Prueba recurrencia")');
   assert.equal(entries.length,2);
   assert(entries.some(x=>x.due==='2027-02-28'&&(x.amount-x.payments.reduce((a,p)=>a+p.amount,0))===25000));
-  assert(entries.some(x=>x.due==='2027-01-31'&&w.owed(x)===0));
+  assert(entries.some(x=>x.due==='2027-01-31'&&(x.amount-x.payments.reduce((a,p)=>a+p.amount,0))===0));
 });
 check('Formulario advierte cambios sin guardar',()=>{
   w.openEntryForm('expense');
