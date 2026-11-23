@@ -226,3 +226,5 @@ summary=function(){
 const bankBaseBackup=backup;
 backup=async function(){return bankBaseBackup();};
 render();
+
+Object.assign(window,{bankCsvRows,bankReadRows,bankDate,bankMoney,bankImportConfirmed,bankHandleFile,bankReview});
