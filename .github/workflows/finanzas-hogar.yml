@@ -11,6 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+    env:
+      FINANZAS_KEYSTORE_B64: ${{ secrets.FINANZAS_KEYSTORE_B64 }}
+      FINANZAS_STORE_PASSWORD: ${{ secrets.FINANZAS_STORE_PASSWORD }}
     defaults:
       run:
         working-directory: finanzas-hogar
@@ -34,15 +37,28 @@ jobs:
           npx cap sync android
           python3 -m pip install --quiet cairosvg
           python3 scripts/generate_icons.py
-      - name: Compilar APK de prueba
+          sed -i -E "s/versionCode [0-9]+/versionCode $GITHUB_RUN_NUMBER/; s/versionName \"[^\"]+\"/versionName \"1.2.$GITHUB_RUN_NUMBER\"/" android/app/build.gradle
+      - name: Compilar APK de prueba sin firma persistente
+        if: env.FINANZAS_KEYSTORE_B64 == ''
         run: |
           cd android
           chmod +x gradlew
           ./gradlew --no-daemon assembleDebug
+          cp app/build/outputs/apk/debug/app-debug.apk ../Mis-Gastos-Chile-Finanzas.apk
+      - name: Compilar APK firmado para futuras actualizaciones
+        if: env.FINANZAS_KEYSTORE_B64 != ''
+        run: |
+          printf '%s' "$FINANZAS_KEYSTORE_B64" | base64 --decode > finanzas-signing.jks
+          cd android
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleRelease
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" sign --ks ../finanzas-signing.jks --ks-key-alias finanzas --ks-pass env:FINANZAS_STORE_PASSWORD --key-pass env:FINANZAS_STORE_PASSWORD --out ../Mis-Gastos-Chile-Finanzas.apk app/build/outputs/apk/release/app-release-unsigned.apk
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose ../Mis-Gastos-Chile-Finanzas.apk
+          rm -f ../finanzas-signing.jks
       - name: Publicar APK en Releases
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="finanzas-v1.1.${{ github.run_number }}"
-          cp android/app/build/outputs/apk/debug/app-debug.apk Mis-Gastos-Chile-Finanzas.apk
-          gh release create "$TAG" Mis-Gastos-Chile-Finanzas.apk --title "Mis Gastos Chile Finanzas Hogar $TAG" --notes "Nueva app de prueba, separada de la versión Java. Respaldar datos antes de desinstalar cualquier versión." --prerelease --target "$GITHUB_SHA"
+          if [ -n "$FINANZAS_KEYSTORE_B64" ]; then NOTE="APK firmado con clave persistente para actualizar futuras versiones. Primera instalación con esta clave requiere migración desde APK debug."; else NOTE="APK de prueba DEBUG. Android no podrá actualizar una instalación firmada con otra clave. No desinstales sin respaldo verificado."; fi
+          gh release create "$TAG" Mis-Gastos-Chile-Finanzas.apk --title "Mis Gastos Chile Finanzas Hogar $TAG" --notes "$NOTE" --prerelease --target "$GITHUB_SHA"
