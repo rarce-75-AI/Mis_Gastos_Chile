@@ -21,4 +21,23 @@ check('Opciones de recibos y formulario',()=>{w.openEntryForm('expense');assert(
 check('Filtro de categorías para ingresos',()=>{w.openEntryForm('income');assert.equal(d.querySelector('#cat').value,'Sueldo');assert(!d.querySelector('#billfields').offsetParent||d.querySelector('#billfields').style.display==='none');w.dismissSheet();});
 check('Exportar desde Ajustes',()=>{d.querySelector('[data-tab="ajustes"]').click();assert(d.querySelector('#app').textContent.includes('Exportar para Excel'));assert(d.querySelector('#app').textContent.includes('Copias de seguridad'));});
 check('Se conserva el icono en el proyecto',()=>{assert(fs.existsSync('assets/icon.svg'));assert(fs.existsSync('scripts/generate_icons.py'));});
+check('Recordatorios 5 y 3 días antes',()=>{
+  const due=new Date();due.setDate(due.getDate()+12);
+  const date=[due.getFullYear(),String(due.getMonth()+1).padStart(2,'0'),String(due.getDate()).padStart(2,'0')].join('-');
+  w.openEntryForm('bill');
+  d.querySelector('#amt').value='35000';
+  d.querySelector('#due').value=date;
+  w.save();
+  w.eval('remindersEnabled=true');
+  const reminders=w.reminderPlan().filter(x=>x.body.includes('35.000'));
+  assert.equal(reminders.length,2);
+  assert.deepEqual(reminders.map(x=>x.extra.days).sort(),[3,5]);
+  w.eval('remindersEnabled=false');
+});
+check('Panel de notificaciones en ajustes',()=>{
+  d.querySelector('[data-tab="ajustes"]').click();
+  assert(d.querySelector('#app').textContent.includes('5 días'));
+  assert(d.querySelector('#app').textContent.includes('3 días'));
+  assert(d.querySelector('#app').textContent.includes('Activar recordatorios'));
+});
 if(errs.length){console.error(errs.join('\n'));process.exitCode=1}
