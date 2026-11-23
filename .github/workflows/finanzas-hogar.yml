@@ -1,4 +1,4 @@
-name: Compilar Finanzas Hogar V1.1
+name: Compilar Mis Finanzas Android
 # Firma privada configurada mediante GitHub Actions Secrets; no guardar claves en el repositorio.
 on:
   push:
@@ -45,7 +45,7 @@ jobs:
           cd android
           chmod +x gradlew
           ./gradlew --no-daemon assembleDebug
-          cp app/build/outputs/apk/debug/app-debug.apk ../Mis-Gastos-Chile-Finanzas.apk
+          cp app/build/outputs/apk/debug/app-debug.apk ../Mis-Finanzas.apk
       - name: Compilar APK firmado para futuras actualizaciones
         if: env.FINANZAS_KEYSTORE_B64 != ''
         run: |
@@ -53,19 +53,19 @@ jobs:
           cd android
           chmod +x gradlew
           ./gradlew --no-daemon assembleRelease
-          "$ANDROID_HOME/build-tools/35.0.0/apksigner" sign --ks ../finanzas-signing.jks --ks-key-alias finanzas --ks-pass env:FINANZAS_STORE_PASSWORD --key-pass env:FINANZAS_STORE_PASSWORD --out ../Mis-Gastos-Chile-Finanzas.apk app/build/outputs/apk/release/app-release-unsigned.apk
-          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose ../Mis-Gastos-Chile-Finanzas.apk
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" sign --ks ../finanzas-signing.jks --ks-key-alias finanzas --ks-pass env:FINANZAS_STORE_PASSWORD --key-pass env:FINANZAS_STORE_PASSWORD --out ../Mis-Finanzas.apk app/build/outputs/apk/release/app-release-unsigned.apk
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose ../Mis-Finanzas.apk
           rm -f ../finanzas-signing.jks
       - name: Verificar ícono y nombre instalables en APK
         run: |
-          test -s Mis-Gastos-Chile-Finanzas.apk
-          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging Mis-Gastos-Chile-Finanzas.apk | grep -E '^package:|^application-label:|^application-icon-'
-          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging Mis-Gastos-Chile-Finanzas.apk | grep -q "application-label:'Mis Gastos Chile'"
-          unzip -l Mis-Gastos-Chile-Finanzas.apk | grep 'ic_launcher' | head -15
+          test -s Mis-Finanzas.apk
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging Mis-Finanzas.apk | grep -E '^package:|^application-label:|^application-icon-'
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging Mis-Finanzas.apk | grep -q "application-label:'Mis Finanzas'"
+          unzip -l Mis-Finanzas.apk | grep 'ic_launcher' | head -15
       - name: Publicar APK en Releases
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="finanzas-v1.1.${{ github.run_number }}"
           if [ -n "$FINANZAS_KEYSTORE_B64" ]; then NOTE="APK firmado con clave persistente para actualizar futuras versiones. Primera instalación con esta clave requiere migración desde APK debug."; else NOTE="APK de prueba DEBUG. Android no podrá actualizar una instalación firmada con otra clave. No desinstales sin respaldo verificado."; fi
-          gh release create "$TAG" Mis-Gastos-Chile-Finanzas.apk --title "Mis Gastos Chile Finanzas Hogar $TAG" --notes "$NOTE" --prerelease --target "$GITHUB_SHA"
+          gh release create "$TAG" Mis-Finanzas.apk --title "Mis Finanzas $TAG" --notes "$NOTE" --prerelease --target "$GITHUB_SHA"
