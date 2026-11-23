@@ -128,4 +128,42 @@ check('Respaldo incluye abonos y sus comprobantes',()=>{
   assert(w.financeBackupFileKeys().includes('payment:abc123'));
 });
 
+
+w.eval(fs.readFileSync('www/bank-import.js','utf8'));
+check('Cartola bancaria aparece en ajustes',()=>{
+  d.querySelector('[data-tab="ajustes"]').click();
+  assert(d.querySelector('#bankFile'));
+  assert(d.querySelector('#app').textContent.includes('Cuenta bancaria principal'));
+});
+check('CSV Chile interpretado con separador y montos CLP',()=>{
+  const csv='Fecha;Descripcion;Cargo;Abono;Saldo\n24-11-2026;COPEC;60.079;;618.254\n23-11-2026;Transf. de Roberto Arce;;500.000;1.118.254';
+  const matrix=w.bankCsvRows(csv);
+  assert.equal(matrix.length,3);
+  const parsed=w.bankReadRows(matrix,'prueba.csv');
+  assert.equal(parsed.length,2);
+  assert.equal(parsed[0].amount,60079);
+  assert.equal(parsed[0].category,'Bencina');
+  assert.equal(parsed[1].amount,500000);
+  assert.equal(parsed[1].kind,'transfer');
+  assert.equal(parsed[1].selected,false);
+});
+check('Importa cargos sin contabilizar traspasos y conserva registros',()=>{
+  const before=w.eval('db.items.length');
+  w.bankImportConfirmed();
+  const after=w.eval('db.items.length');
+  assert.equal(after-before,1);
+  assert.equal(w.eval('db.items.find(x=>x.note==="COPEC").amount'),60079);
+  assert.equal(w.eval('db.bankBalance.amount'),618254);
+});
+check('No importa el mismo movimiento por segunda vez',()=>{
+  const rows=w.bankCsvRows('Fecha;Descripcion;Cargo;Abono;Saldo\n24-11-2026;COPEC;60.079;;618.254');
+  const arr=w.bankReadRows(rows,'duplicado.csv');
+  assert(arr[0].duplicate);
+  assert(!arr[0].selected);
+});
+check('Importador reconoce fechas Excel y montos bancarios',()=>{
+  assert.equal(w.bankDate('24-11-2026'),'2026-11-24');
+  assert.equal(w.bankMoney('$ 1.014.270'),1014270);
+  assert.equal(w.bankMoney('1,234.50'),1235);
+});
 if(errs.length){console.error(errs.join('\n'));process.exitCode=1}

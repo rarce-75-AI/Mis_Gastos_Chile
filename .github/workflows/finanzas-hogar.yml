@@ -33,6 +33,7 @@ jobs:
       - name: Preparar Capacitor
         run: |
           npm install
+          npx esbuild src/statement-xlsx-entry.js --bundle --platform=browser --format=iife --minify --outfile=www/statement-xlsx.js
           node tests/smoke.cjs
           npx cap add android
           npx cap sync android
