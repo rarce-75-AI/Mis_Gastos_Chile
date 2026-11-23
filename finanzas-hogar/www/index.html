@@ -39,4 +39,171 @@ function download(name,content,mime){let url=URL.createObjectURL(new Blob([conte
 function backup(){download('Mis_Gastos_Respaldo_'+today()+'.json',JSON.stringify({schema:2,data:db},null,2),'application/json')}
 function csv(){let out=[['Fecha','Tipo','Categoría','Monto','Detalle','Vencimiento','Estado','Saldo']];for(let x of db.items){out.push([x.date,x.type,x.category,x.amount,x.note,x.due,state(x),x.type==='bill'?owed(x):'']);for(let p of x.payments||[])out.push([p.date,'abono',x.category,p.amount,p.method,x.due,'',''])}download('Mis_Gastos_'+today()+'.csv','\ufeff'+out.map(row=>row.map(z=>'"'+String(z??'').replace(/"/g,'""')+'"').join(';')).join('\r\n'),'text/csv;charset=utf-8')}
 $('file').onchange=async e=>{let file=e.target.files[0];if(!file)return;try{let obj=JSON.parse(await file.text()),d=obj.data||obj;if(!Array.isArray(d.items))throw Error('Archivo no compatible');if(confirm('¿Reemplazar todos los registros con el respaldo?')){db=d;persist();render()}}catch(err){alert(err.message)}e.target.value=''};render();
+
+/* MEJORAS V1.2 — comprobantes locales, exportación móvil y respaldo íntegro */
+let selectedReceipt=null;
+const receiptsDB=()=>new Promise((resolve,reject)=>{
+  const req=indexedDB.open('mis-gastos-comprobantes-v1',1);
+  req.onupgradeneeded=()=>req.result.createObjectStore('archivos');
+  req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
+});
+async function receiptStore(key,blob){
+  const d=await receiptsDB();
+  try{await new Promise((resolve,reject)=>{const t=d.transaction('archivos','readwrite');t.objectStore('archivos').put(blob,key);t.oncomplete=resolve;t.onerror=()=>reject(t.error);});}
+  finally{d.close();}
+}
+async function receiptRead(key){
+  const d=await receiptsDB();
+  try{return await new Promise((resolve,reject)=>{const t=d.transaction('archivos','readonly'),q=t.objectStore('archivos').get(key);q.onsuccess=()=>resolve(q.result||null);q.onerror=()=>reject(q.error);});}
+  finally{d.close();}
+}
+async function receiptDelete(key){
+  const d=await receiptsDB();
+  try{await new Promise((resolve,reject)=>{const t=d.transaction('archivos','readwrite');t.objectStore('archivos').delete(key);t.oncomplete=resolve;t.onerror=()=>reject(t.error);});}
+  finally{d.close();}
+}
+const receiptMaxSize=8*1024*1024;
+function receiptControls(){
+  const sheet=$('sheet');
+  const holder=document.createElement('div');
+  holder.innerHTML='<label for="receiptPick">📎 Comprobante (fotografía o PDF, opcional)</label><input type="file" id="receiptPick" accept="image/jpeg,image/png,image/webp,application/pdf,image/*" style="color:#fff"><small id="receiptHelp" style="display:block;margin-top:8px">Puedes adjuntar una boleta, factura o comprobante de transferencia, hasta 8 MB.</small>';
+  const saveButton=sheet.querySelector('button[onclick="save()"]');
+  if(saveButton)saveButton.before(holder);else sheet.append(holder);
+  const input=$('receiptPick');
+  input.addEventListener('change',()=>{
+    const file=input.files&&input.files[0];
+    selectedReceipt=null;
+    if(!file)return;
+    const valid=file.type==='application/pdf'||file.type.startsWith('image/');
+    if(!valid||file.size>receiptMaxSize){
+      alert('Solo fotos o PDF de hasta 8 MB. Elige otro archivo.');
+      input.value='';return;
+    }
+    selectedReceipt=file;
+    $('receiptHelp').textContent='Seleccionado: '+file.name;
+  });
+}
+const basicOpenEntryForm=openEntryForm;
+openEntryForm=function(type='expense',key=null){
+  selectedReceipt=null;basicOpenEntryForm(type,key);
+  receiptControls();
+  const dropdown=$('type'),category=$('cat');
+  function filterCategories(){
+    const selected=category.value,kind=dropdown.value;
+    const names=kind==='income'?['Sueldo','Honorarios','Ventas','Otros']:
+     ['Luz','Agua','Gas','Internet','Plan celular','Arriendo','Dividendo','Contribuciones','Bencina','Diésel','Parafina','Supermercado','Alimentación','Transporte','Salud','Educación','Crédito','Tarjeta','Otros'];
+    category.replaceChildren();
+    for(const name of names){const op=document.createElement('option');op.value=name;op.textContent=name;category.append(op);}
+    category.value=names.includes(selected)?selected:kind==='income'?'Sueldo':kind==='bill'?'Luz':'Supermercado';
+  }
+  dropdown.addEventListener('change',filterCategories);
+  filterCategories();
+};
+const basicSave=save;
+save=async function(){
+  const priorId=editing, prior=priorId?db.items.find(x=>x.id===priorId):null;
+  if(prior&&prior.type==='bill'&&paid(prior)>0&&$('type').value!=='bill'){
+    $('err').textContent='Esta cuenta tiene abonos. No puedes cambiarla a ingreso o gasto sin perder el historial.';return;
+  }
+  const before=new Set(db.items.map(x=>x.id)), file=selectedReceipt;
+  basicSave();
+  if($('overlay').classList.contains('on'))return;
+  const item=priorId?db.items.find(x=>x.id===priorId):db.items.find(x=>!before.has(x.id));
+  selectedReceipt=null;
+  if(!item||!file)return;
+  try{
+    await receiptStore(item.id,file);
+    item.receipt={name:file.name,mime:file.type,size:file.size};
+    persist();render();
+    alert('Registro y comprobante guardados correctamente.');
+  }catch(error){alert('Guardé el movimiento, pero no pude guardar el comprobante. Revisa el espacio disponible en el teléfono.');}
+};
+const basicDetail=detail;
+detail=function(key){
+  basicDetail(key);const item=db.items.find(x=>x.id===key);if(!item)return;
+  const actions=$('sheet').querySelector('.actions');if(!actions)return;
+  const add=document.createElement('button');add.className='btn';add.textContent=item.receipt?'📎 Cambiar comprobante':'📎 Adjuntar comprobante';
+  add.onclick=()=>{
+    const picker=document.createElement('input');picker.type='file';picker.accept='image/*,application/pdf';
+    picker.onchange=async()=>{
+      const file=picker.files&&picker.files[0];if(!file)return;
+      if(!(file.type==='application/pdf'||file.type.startsWith('image/'))||file.size>receiptMaxSize){alert('Usa una imagen o un PDF de hasta 8 MB.');return;}
+      try{await receiptStore(item.id,file);item.receipt={name:file.name,mime:file.type,size:file.size};persist();detail(key);}
+      catch(e){alert('No se pudo guardar el comprobante.');}
+    };picker.click();
+  };actions.append(add);
+  if(item.receipt){
+    const see=document.createElement('button');see.className='btn primary';see.textContent='👁 Ver comprobante';
+    see.onclick=()=>showReceipt(key);actions.append(see);
+  }
+};
+async function showReceipt(key){
+  const item=db.items.find(x=>x.id===key),blob=await receiptRead(key);
+  if(!blob){alert('No se encontró el comprobante en este teléfono.');return;}
+  if(blob.type.startsWith('image/')){
+    const url=URL.createObjectURL(blob);
+    modal('<div class="row"><h2>Comprobante</h2><button onclick="dismissSheet()">×</button></div><p class="muted">'+esc(item?.receipt?.name||'Fotografía')+'</p><img id="receiptPreview" alt="Comprobante" style="width:100%;height:auto;max-height:65vh;object-fit:contain;border-radius:12px"><br><br><button class="btn full" id="shareReceipt">Compartir o guardar comprobante</button>');
+    $('receiptPreview').src=url;
+    $('receiptPreview').onload=()=>setTimeout(()=>URL.revokeObjectURL(url),30000);
+    $('shareReceipt').onclick=()=>shareMobile(item.receipt.name,blob,blob.type);
+  }else await shareMobile(item?.receipt?.name||'comprobante.pdf',blob,'application/pdf');
+}
+const basicRemove=remove;
+remove=function(key){
+  if(!confirm('¿Eliminar este movimiento, sus abonos y su comprobante? Esta acción no se puede deshacer.'))return;
+  db.items=db.items.filter(x=>x.id!==key);persist();dismissSheet();render();
+  receiptDelete(key).catch(()=>{});
+};
+function blobDataUrl(blob){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(r.error);r.readAsDataURL(blob);});}
+function dataUrlBlob(data){
+  const parts=data.split(','),mime=/data:(.*?);/.exec(parts[0])?.[1]||'application/octet-stream',binary=atob(parts[1]||''),bytes=new Uint8Array(binary.length);
+  for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);return new Blob([bytes],{type:mime});
+}
+async function shareMobile(filename,blob,mime){
+  try{
+    const cap=window.Capacitor;
+    const fs=cap?.Plugins?.Filesystem||(cap?.registerPlugin?cap.registerPlugin('Filesystem'):null);
+    const share=cap?.Plugins?.Share||(cap?.registerPlugin?cap.registerPlugin('Share'):null);
+    if(fs&&share){
+      const data=await blobDataUrl(blob),safe=filename.replace(/[^A-Za-z0-9_.-]/g,'_');
+      const path='exportaciones/'+Date.now()+'_'+safe;
+      await fs.writeFile({path,data:data.split(',')[1],directory:'CACHE',recursive:true});
+      const uri=await fs.getUri({path,directory:'CACHE'});
+      await share.share({title:'Mis Gastos Chile',url:uri.uri,dialogTitle:'Abrir, compartir o guardar archivo'});
+      return;
+    }
+  }catch(error){console.warn('No se pudo abrir el menú para compartir',error);}
+  const uri=URL.createObjectURL(blob),a=document.createElement('a');a.href=uri;a.download=filename;a.click();setTimeout(()=>URL.revokeObjectURL(uri),10000);
+}
+csv=async function(){
+  const out=[['Fecha','Tipo','Categoría','Monto','Detalle','Vencimiento','Estado','Saldo pendiente','Comprobante']];
+  for(const x of db.items){
+    out.push([x.date,x.type,x.category,x.amount,x.note||'',x.due||'',state(x),x.type==='bill'?owed(x):'',x.receipt?.name||'']);
+    for(const p of x.payments||[])out.push([p.date,'Abono',x.category,p.amount,p.method||'',x.due||'','Pagado','','']);
+  }
+  const content='\ufeff'+out.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');
+  await shareMobile('Mis_Gastos_'+today()+'.csv',new Blob([content],{type:'text/csv;charset=utf-8'}),'text/csv');
+};
+backup=async function(){
+  const attachments={};
+  try{
+    for(const item of db.items){if(item.receipt){const blob=await receiptRead(item.id);if(blob)attachments[item.id]=await blobDataUrl(blob);}}
+    const data=JSON.stringify({schema:3,data:db,attachments});
+    await shareMobile('Respaldo_Mis_Gastos_'+today()+'.json',new Blob([data],{type:'application/json'}),'application/json');
+  }catch(e){alert('No se pudo preparar la copia completa. Revisa el espacio disponible.');}
+};
+$('file').onchange=async e=>{
+  const file=e.target.files?.[0];if(!file)return;
+  try{
+    const record=JSON.parse(await file.text()),next=record.data||record;
+    if(!Array.isArray(next.items))throw Error('Este archivo no es un respaldo válido de Mis Gastos.');
+    if(!confirm('¿Recuperar esta copia? Se reemplazarán todos los registros actuales.'))return;
+    if(record.attachments){
+      for(const [key,data] of Object.entries(record.attachments))await receiptStore(key,dataUrlBlob(data));
+    }
+    db=next;persist();render();alert('Datos recuperados correctamente.');
+  }catch(err){alert('No se pudo recuperar el respaldo: '+err.message);}
+  finally{e.target.value='';}
+};
+
 </script></body></html>
