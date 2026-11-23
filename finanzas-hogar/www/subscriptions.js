@@ -17,6 +17,7 @@ const subCatalog={
  'Paramount+':['Estándar','Premium','Otro plan'],
  'Otro servicio':['Personalizado']
 };
+function subNormalize(s){return String(s??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/\s+/g,' ').trim();}
 function subDate(day,from=today()){
   const [y,m]=from.split('-').map(Number),last=new Date(y,m,0).getDate();
   return iso(new Date(y,m-1,Math.min(+day,last)));
@@ -115,7 +116,7 @@ function subSave(){
     }
   }else{
     const first=$('subFirstMonth').value;if(!/^\d{4}-\d{2}$/.test(first)){$('subError').textContent='Selecciona un mes inicial válido.';return;}
-    const duplicate=subSeries().some(s=>s.active&&bankNormalize(s.latest.subscriptionService)===bankNormalize(name)&&bankNormalize(s.latest.subscriptionPlan)===bankNormalize(plan));
+    const duplicate=subSeries().some(s=>s.active&&subNormalize(s.latest.subscriptionService)===subNormalize(name)&&subNormalize(s.latest.subscriptionPlan)===subNormalize(plan));
     if(duplicate){$('subError').textContent='Ya tienes ese servicio y plan activo. Edítalo en vez de duplicarlo.';return;}
     const keyId=id(),due=subDate(day,first+'-01');
     db.items.push({id:id(),type:'bill',category:'Otros',amount,date:today(),due,note:name+' · '+plan,payments:[],
@@ -145,5 +146,5 @@ settings=function(){
     '<p class="muted">Gestiona servicios, planes, montos y vencimientos. No se hacen cargos automáticos.</p>'+
     '<button class="btn primary full" onclick="subManage()">Administrar suscripciones</button></section>'+subBaseSettings();
 };
-Object.assign(window,{subForm,subManage,subSave,subToggle,subUpdatePlans,subUpdateCustomPlan,subSeries,subDate,subNextDate});
+Object.assign(window,{subCatalog,subForm,subManage,subSave,subToggle,subUpdatePlans,subUpdateCustomPlan,subSeries,subDate,subNextDate});
 render();
