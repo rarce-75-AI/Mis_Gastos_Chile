@@ -2,7 +2,36 @@
 :root{color-scheme:dark;--bg:#0b1729;--card:#1b2940;--line:#33435d;--mint:#43daa5;--muted:#acbbcf;--red:#ff8587}*{box-sizing:border-box}body{margin:0;font:15px system-ui,-apple-system,sans-serif;background:var(--bg);color:white}header{padding:20px 18px 8px}header strong{font-size:22px}small,.muted{color:var(--muted)}main{padding:10px 14px 115px;max-width:620px;margin:auto}.card{background:var(--card);padding:17px;border-radius:19px;margin-bottom:13px}.balance{background:linear-gradient(135deg,#184a4a,#162b4b)}.balance .big{font-size:33px;color:var(--mint);display:block;margin:9px 0;font-weight:800}h2{font-size:18px;margin:0 0 12px}.row{display:flex;justify-content:space-between;gap:12px;align-items:center}.row>*{min-width:0}.positive{color:var(--mint)}.bad{color:var(--red)}.line{display:flex;align-items:center;gap:12px;border-top:1px solid var(--line);padding:13px 0;cursor:pointer}.line .ico{font-size:25px;width:36px}.line .detail{flex:1;min-width:0}.line .detail strong{display:block}.line .detail small{display:block;white-space:normal}.line .amount{font-weight:700;white-space:nowrap}.tag{font-size:11px;padding:2px 7px;border-radius:12px;background:#354961;display:inline-block;margin-top:5px}.tag.late{background:#612d3a;color:#ffb8b9}.actions,.filters{display:flex;flex-wrap:wrap;gap:9px;margin:12px 0}.btn,button{border:0;border-radius:12px;padding:12px;color:white;background:#34445e;font:inherit;cursor:pointer}.btn.primary{background:#147f66;font-weight:700}.actions>.btn{flex:1;min-width:135px}.full{width:100%}.filters button.on{background:#147f66}nav{position:fixed;bottom:0;left:0;right:0;background:#142239;display:flex;padding:9px 3px max(10px,env(safe-area-inset-bottom));box-shadow:0 -8px 25px #061020b0}nav button{flex:1;font-size:11px;padding:7px 2px;background:transparent;color:var(--muted)}nav button.on{color:var(--mint)}nav button b{display:block;font-size:20px}label{display:block;color:var(--muted);margin:13px 0 5px;font-size:13px}input,select{width:100%;padding:13px;border:1px solid #435774;background:#0f1c30;color:white;border-radius:10px;font:inherit}input[type=checkbox]{width:auto}.overlay{display:none;position:fixed;inset:0;z-index:4;background:#030914bb;align-items:end}.overlay.on{display:flex}.sheet{background:#1b2940;border-radius:22px 22px 0 0;padding:20px;width:100%;max-height:92vh;overflow:auto}.sheet h2{margin:0}.sheet .row{margin-bottom:10px}.plot{width:140px;height:140px;border-radius:50%;margin:14px auto;background:#35445c;display:grid;place-items:center}.plot span{width:85px;height:85px;border-radius:50%;background:var(--card);display:grid;place-items:center;text-align:center;font-size:12px}.legend{display:grid;grid-template-columns:1fr 1fr;gap:8px}.legend div{font-size:12px}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px}.progress{height:9px;background:#33435d;border-radius:10px;overflow:hidden;margin:12px 0}.progress div{background:var(--mint);height:100%}.empty{color:var(--muted);padding:13px 0}.toolbar{display:flex;align-items:center;justify-content:center;gap:25px;margin-bottom:12px}.toolbar button{font-size:23px;padding:4px 12px}.error{color:var(--red);margin-top:8px}#file{display:none}
 </style><style>
 body{background:#0d1729}header{background:linear-gradient(115deg,#083f37,#0c2337 78%);padding:19px 19px 16px;text-align:center;border-bottom:1px solid #244350}header strong{font-size:19px;letter-spacing:.2px}main{padding-top:14px}.card{background:#1c293e;border:1px solid #26354d;box-shadow:0 5px 18px #07102133;border-radius:16px}.balance{background:linear-gradient(135deg,#0b5448,#12273f 95%);text-align:center;padding:21px 15px 18px}.balance .big{font-size:clamp(29px,8vw,40px);margin:5px 0 17px}.balance small{letter-spacing:.4px}.statgrid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin:16px 0 0}.statcard{background:#1c293e;border-radius:14px;padding:14px 10px;display:flex;align-items:center;gap:8px;min-width:0}.statcard .statIcon{display:grid;place-items:center;flex-shrink:0;border-radius:50%;background:#1c594d;width:32px;height:32px;color:#56edb0;font-size:20px}.statcard.out .statIcon{background:#574047;color:#ff987d}.statcard small{display:block;font-size:12px}.statcard strong{font-size:15px;white-space:nowrap}.primaryHero{width:100%;display:flex;justify-content:flex-start;align-items:center;gap:13px;text-align:left;background:#26354c;border-radius:13px;margin:2px 0 13px;font-weight:700}.primaryHero .plus{background:#315778;width:36px;height:36px;display:grid;place-items:center;border-radius:50%;font-size:24px}.dashboardChart{display:flex;align-items:center;gap:12px}.dashboardChart .plot{width:132px;height:132px;flex:0 0 132px;margin:10px 0}.dashboardChart .plot span{width:78px;height:78px}.dashboardChart .legend{flex:1;display:block}.dashboardChart .legend div{margin:9px 0;font-size:12px}.urgent{display:flex;justify-content:space-between;align-items:center;background:#392937;padding:12px;border-radius:12px;margin-bottom:12px;gap:12px}.urgent .bad{font-weight:bold}nav{border-top:1px solid #2d3d54}nav button.on{color:#43daa5}
-</style><style>button{min-height:44px;touch-action:manipulation}button:active{transform:scale(.985)}.line{min-height:65px}.line .amount{font-size:13px}.sheet{padding-bottom:max(24px,env(safe-area-inset-bottom));overscroll-behavior:contain}.sheet input,.sheet select{font-size:16px}summary{padding:8px 0}body{-webkit-tap-highlight-color:transparent}#receiptPick{min-height:52px}</style></head><body><header><strong>Mis Finanzas</strong><br><small>Tus finanzas, bajo control</small></header><main id="app"></main><nav id="nav"></nav><div class="overlay" id="overlay"><div class="sheet" id="sheet"></div></div><input type="file" id="file" accept=".json"><script>
+</style><style>button{min-height:44px;touch-action:manipulation}button:active{transform:scale(.985)}.line{min-height:65px}.line .amount{font-size:13px}.sheet{padding-bottom:max(24px,env(safe-area-inset-bottom));overscroll-behavior:contain}.sheet input,.sheet select{font-size:16px}summary{padding:8px 0}body{-webkit-tap-highlight-color:transparent}#receiptPick{min-height:52px}</style>
+<style id="financeIntegratedStyle">
+.financeQuick{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.financeQuick button{font-size:13px;font-weight:700;padding:12px 5px}
+.financeTypes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:9px 0 15px}
+.financeTypes button{padding:12px 5px;background:#293954;border:1px solid #334a66}
+.financeTypes button.selected{background:#117a62;border-color:#47e0ac;font-weight:700}
+.financeUpload{margin:16px 0}
+.financeUpload small{display:block;margin:8px 0}
+.financeCheck{display:flex;align-items:center;gap:9px;color:#fff;margin:15px 0}
+.financeCheck input{width:auto;accent-color:#43daa5}
+#fullfields{margin-bottom:12px}
+.closeX{min-width:46px;min-height:46px;font-size:24px;padding:6px 12px;flex-shrink:0}
+.financeTotals{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;padding:14px 0}
+.financePaymentRow{border-top:1px solid #34445e;padding:13px 0;display:flex;justify-content:space-between;gap:10px;align-items:center;flex-wrap:wrap}
+.financePaymentRow small{display:block;color:#acbbcf;margin-top:4px}
+.financePaymentButtons{display:flex;gap:5px;flex-wrap:wrap}
+.financePaymentButtons button{font-size:12px;padding:8px}
+.financeFilterRow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.financeHistoryRow{border-bottom:1px solid #34445e;padding-bottom:5px}
+.financeHistoryRow .line{border:0}
+.financeHistoryRow>button{margin-bottom:9px;font-size:12px;padding:7px 12px}
+.notice{position:fixed;left:12px;right:12px;bottom:calc(82px + env(safe-area-inset-bottom));background:#0a765e;color:#fff;z-index:10;padding:13px 16px;border-radius:12px;box-shadow:0 5px 25px #0009;text-align:center}
+.notice.bad{background:#9a283a}
+.line .amount{white-space:normal;text-align:right;max-width:40%;overflow-wrap:anywhere}
+.sheet{max-height:calc(100dvh - 12px)}
+#financeForm button[type=submit],#financePayment button[type=submit]{margin-top:16px}
+@media(max-width:370px){.financeQuick button{font-size:11px}.financePaymentButtons button{font-size:11px}}
+</style>
+</head><body><header><strong>Mis Finanzas</strong><br><small>Tus finanzas, bajo control</small></header><main id="app"></main><nav id="nav"></nav><div class="overlay" id="overlay"><div class="sheet" id="sheet"></div></div><input type="file" id="file" accept=".json"><script>
 'use strict';
 const KEY='mis_gastos_chile_capacitor_v2',cats=['Luz','Agua','Gas','Internet','Plan celular','Arriendo','Dividendo','Contribuciones','Bencina','Diésel','Parafina','Supermercado','Alimentación','Transporte','Salud','Educación','Crédito','Tarjeta','Otros'],icons={'Luz':'⚡','Agua':'💧','Gas':'🔥','Internet':'🌐','Plan celular':'📱','Bencina':'⛽','Diésel':'⛽','Parafina':'🛢️','Supermercado':'🛒','Sueldo':'💰'},groups=['Servicios','Alimentación','Transporte','Vivienda','Otros'],colors=['#539dff','#46dba5','#ad95f8','#f1b26c','#ff8791'];
 const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'),today=()=>iso(new Date()),id=()=>Date.now()+'-'+Math.random().toString(36).slice(2),money=n=>(db.currency==='CLP'?'$':db.currency+' ')+Math.round(n||0).toLocaleString('es-CL'),paid=x=>(x.payments||[]).reduce((a,p)=>a+Number(p.amount||0),0),owed=x=>Math.max(0,x.amount-paid(x)),state=x=>x.type!=='bill'?'':owed(x)===0?'Pagada':x.due<today()?'Vencida':'Pendiente',group=c=>['Luz','Agua','Gas','Internet','Plan celular'].includes(c)?0:['Supermercado','Alimentación'].includes(c)?1:['Bencina','Diésel','Parafina','Transporte'].includes(c)?2:['Arriendo','Dividendo','Contribuciones'].includes(c)?3:4;
@@ -39,7 +68,7 @@ function registerAndroidBack(){try{const cap=window.Capacitor;const app=cap?.Plu
 if(!registerAndroidBack())window.addEventListener('load',registerAndroidBack);
 function openEntryForm(type='expense',key=null){const x=db.items.find(z=>z.id===key);editing=key;modal('<div class="row"><h2>'+(x?'Editar':'Nuevo')+' registro</h2><button onclick="dismissSheet()">×</button></div><label>Tipo</label><select id="type" onchange="switchType()"><option value="bill">Cuenta por pagar</option><option value="expense">Gasto pagado</option><option value="income">Ingreso</option></select><label>Categoría</label><select id="cat">'+[...cats,'Sueldo','Ventas','Honorarios'].map(v=>'<option>'+v+'</option>').join('')+'</select><label>Monto</label><input id="amt" type="number" min="1" placeholder="Ejemplo: 48000"><label>Empresa o detalle</label><input id="note" placeholder="Ej: Enel · noviembre"><label>Fecha</label><input id="date" type="date"><div id="billfields"><label>Fecha de vencimiento (también fechas pasadas)</label><input id="due" type="date"><label>Ya pagada <input id="fully" type="checkbox"></label></div><div class="error" id="err"></div><br><button class="btn primary full" onclick="save()">Guardar</button>');$('type').value=x?.type||type;$('cat').value=x?.category||(type==='income'?'Sueldo':type==='bill'?'Luz':'Bencina');$('amt').value=x?.amount||'';$('note').value=x?.note||'';$('date').value=x?.date||today();$('due').value=x?.due||today();$('fully').checked=!!(x&&x.type==='bill'&&owed(x)===0);switchType()}
 function switchType(){$('billfields').style.display=$('type').value==='bill'?'block':'none'}
-function save(){let type=$('type').value,amount=Math.round(Number($('amt').value)),date=$('date').value,due=type==='bill'?$('due').value:'';if(!Number.isSafeInteger(amount)||amount<=0||!date||(type==='bill'&&!due)){$('err').textContent='Completa el monto y las fechas correctamente.';return}const old=db.items.find(x=>x.id===editing);if(old&&type==='bill'&&paid(old)>amount){$('err').textContent='El monto es menor a los abonos existentes.';return}let x={id:old?.id||id(),type,amount,date,due,category:$('cat').value,note:$('note').value.trim(),payments:type==='bill'&&old?.type==='bill'?[...old.payments]:[]};if(type==='bill'&&$('fully').checked&&owed(x)>0)x.payments.push({id:id(),date,amount:owed(x),method:'Pago total'});if(old)db.items[db.items.indexOf(old)]=x;else db.items.push(x);persist();dismissSheet();render()}
+function save(){let type=$('type').value,amount=Math.round(Number($('amt').value)),date=$('date').value,due=type==='bill'?$('due').value:'';if(!Number.isSafeInteger(amount)||amount<=0||!date||(type==='bill'&&!due)){$('err').textContent='Completa el monto y las fechas correctamente.';return}const old=db.items.find(x=>x.id===editing);if(old&&type==='bill'&&paid(old)>amount){$('err').textContent='El monto es menor a los abonos existentes.';return}let x={id:old?.id||id(),type,amount,date,due,category:$('cat').value,note:$('note').value.trim(),payments:type==='bill'&&old?.type==='bill'?[...old.payments]:[]};if(type==='bill'&&!old?.payments?.length&&$('fully').checked&&owed(x)>0)x.payments.push({id:id(),date,amount:owed(x),method:'Pago total'});if(old)db.items[db.items.indexOf(old)]=x;else db.items.push(x);persist();dismissSheet();render()}
 function detail(key){const x=db.items.find(z=>z.id===key);if(!x)return;modal('<div class="row"><h2>'+esc(x.category)+'</h2><button onclick="dismissSheet()">×</button></div><h2>'+money(x.amount)+'</h2><p class="muted">'+esc(x.note)+'</p>'+(x.type==='bill'?'<p>Vence: '+esc(x.due)+'<br>Pagado: '+money(paid(x))+'<br>Saldo: '+money(owed(x))+'</p><h2>Abonos</h2>'+(x.payments||[]).map(p=>'<p>'+esc(p.date)+' · '+esc(p.method)+' · '+money(p.amount)+'</p>').join(''):'')+'<div class="actions">'+(x.type==='bill'&&owed(x)>0?'<button class="btn primary" onclick="payment(\''+esc(key)+'\')">Pagar / abonar</button>':'')+'<button class="btn" onclick="openEntryForm(\''+x.type+'\',\''+esc(key)+'\')">Editar</button><button class="btn" onclick="remove(\''+esc(key)+'\')">Eliminar</button></div>')}
 function payment(key){let x=db.items.find(z=>z.id===key);if(!x)return;modal('<div class="row"><h2>Abonar '+esc(x.category)+'</h2><button onclick="dismissSheet()">×</button></div><p>Saldo por pagar: '+money(owed(x))+'</p><label>Monto abonado</label><input id="payAmt" type="number" min="1" max="'+owed(x)+'" value="'+owed(x)+'"><label>Fecha</label><input id="payDate" type="date" value="'+today()+'"><label>Medio de pago</label><select id="method"><option>Transferencia</option><option>Débito</option><option>Crédito</option><option>Efectivo</option></select><div class="error" id="err"></div><br><button class="btn primary full" onclick="savePayment(\''+esc(key)+'\')">Confirmar abono</button>')}
 function savePayment(key){let x=db.items.find(z=>z.id===key),v=Number($('payAmt').value),date=$('payDate').value;if(!x||!Number.isSafeInteger(v)||v<=0||v>owed(x)||!date){$('err').textContent='Monto o fecha inválidos.';return}x.payments.push({id:id(),amount:v,date,method:$('method').value});persist();dismissSheet();render()}
@@ -322,4 +351,375 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)queueRemin
 window.addEventListener('focus',queueReminderSync);
 queueReminderSync();
 
+</script><script>
+/* MIS FINANZAS — mejoras integradas de seguridad, experiencia y recurrencia */
+let financeNoticeTimer=null, financeDirty=false, financeModalInitial='', financeListQuery='', financeListCategory='Todas', financeListMonth='Todos';
+function financeNotify(message,bad=false){
+  let node=$('financeNotice');
+  if(!node){node=document.createElement('div');node.id='financeNotice';node.setAttribute('role','status');document.body.append(node);}
+  node.textContent=message;node.className=bad?'notice bad':'notice';node.style.display='block';
+  clearTimeout(financeNoticeTimer);financeNoticeTimer=setTimeout(()=>{node.style.display='none';},3200);
+}
+function financeDateText(d){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(d||''))return 'Sin fecha';
+  const a=d.split('-');return a[2]+'/'+a[1]+'/'+a[0];
+}
+function financeMonthlyNext(d){
+  const [year,monthNo,day]=String(d).split('-').map(Number);
+  const last=new Date(year,monthNo+1,0).getDate();
+  return iso(new Date(year,monthNo,Math.min(day,last)));
+}
+function financeRecordType(x){return x.type==='income'?'Ingreso':x.type==='bill'?'Cuenta pendiente':'Gasto pagado';}
+function financeFutureBill(x){
+  if(!x||x.type!=='bill'||!x.recurring||owed(x)>0||!x.due)return null;
+  const nextDue=financeMonthlyNext(x.due),root=x.seriesId||x.id;
+  if(db.items.some(z=>z.type==='bill'&&(z.seriesId||z.id)===root&&z.due===nextDue))return null;
+  const newBill={id:id(),type:'bill',amount:x.amount,date:today(),due:nextDue,category:x.category,note:x.note||'',payments:[],recurring:true,seriesId:root};
+  db.items.push(newBill);return newBill;
+}
+function financeDedupeCheck(x){
+  return db.items.some(z=>z.id!==x.id&&z.type===x.type&&Number(z.amount)===Number(x.amount)&&z.category===x.category&&z.note===x.note&&(x.type==='bill'?z.due===x.due:z.date===x.date));
+}
+function financeInputsChanged(){
+  const active=$('financeForm')||$('financePayment');
+  if(!$('overlay').classList.contains('on')||!active)return false;
+  const values=Array.from(active.querySelectorAll('input,select,textarea')).filter(n=>n.type!=='file').map(n=>[n.id,n.type==='checkbox'?n.checked:n.value]);
+  return JSON.stringify(values)!==financeModalInitial||!!selectedReceipt||!!active.querySelector('input[type=file]')?.files?.length;
+}
+function financeConfirmClose(){
+  if(financeInputsChanged()&&!confirm('Hay cambios sin guardar. ¿Quieres descartarlos?'))return false;
+  return true;
+}
+const financeBaseDismiss=dismissSheet;
+dismissSheet=function(){if(!financeConfirmClose())return;financeDirty=false;selectedReceipt=null;financeBaseDismiss();};
+function financeCloseWithoutPrompt(){financeDirty=false;selectedReceipt=null;financeBaseDismiss();}
+function financeForm(type='expense',key=null){
+  const x=db.items.find(z=>z.id===key);editing=key;selectedReceipt=null;
+  const chosen=x?.type||type;
+  const form='<form id="financeForm" onsubmit="event.preventDefault();save()">' +
+   '<div class="row"><h2>'+(x?'Editar movimiento':'Nuevo movimiento')+'</h2><button type="button" class="closeX" aria-label="Cerrar" onclick="dismissSheet()">×</button></div>' +
+   '<label>¿Qué quieres registrar?</label><div class="financeTypes" role="group" aria-label="Tipo de movimiento">'+
+   '<button type="button" data-finance-type="expense" onclick="financeSelectType(\'expense\')">Gasto</button>'+
+   '<button type="button" data-finance-type="income" onclick="financeSelectType(\'income\')">Ingreso</button>'+
+   '<button type="button" data-finance-type="bill" onclick="financeSelectType(\'bill\')">Cuenta</button></div>'+
+   '<input type="hidden" id="type" value="'+esc(chosen)+'">'+
+   '<label for="amt">Monto ($)</label><input id="amt" type="number" inputmode="numeric" min="1" step="1" required placeholder="Ejemplo: 48000">'+
+   '<label for="cat">Categoría</label><select id="cat"></select>'+
+   '<label for="note" id="noteLabel">Comercio o detalle</label><input id="note" maxlength="120" placeholder="Ejemplo: supermercado, sueldo, compañía">'+
+   '<label for="date" id="dateLabel">Fecha del movimiento</label><input id="date" type="date" required>'+
+   '<div id="billfields"><label for="due">Vence el</label><input id="due" type="date">'+
+   '<label class="financeCheck"><input id="recurring" type="checkbox"> Repetir esta cuenta cada mes</label>'+
+   '<small class="muted">La siguiente cuenta pendiente se crea al pagar esta. Nunca se marca como pagada automáticamente.</small>'+
+   '<label class="financeCheck"><input id="fully" type="checkbox"> Ya pagué esta cuenta</label>'+
+   '<div id="fullfields"><label for="fullDate">Fecha en que pagué</label><input type="date" id="fullDate">'+
+   '<label for="fullMethod">Medio de pago</label><select id="fullMethod"><option>Transferencia</option><option>Débito</option><option>Crédito</option><option>Efectivo</option><option>Otro</option></select></div></div>'+
+   '<div class="financeUpload"><label for="receiptPick">📎 Comprobante (opcional)</label>'+
+   '<input type="file" id="receiptPick" accept="image/*,application/pdf">'+
+   '<small id="receiptHelp" class="muted">'+(x?.receipt?'Actual: '+esc(x.receipt.name)+' · Si no eliges otro, se conserva.':'Foto o PDF de hasta 8 MB')+'</small></div>'+
+   '<div class="error" id="err" role="alert"></div><button type="submit" class="btn primary full">Guardar '+(chosen==='bill'?'cuenta':chosen==='income'?'ingreso':'gasto')+'</button></form>';
+  modal(form);
+  $('amt').value=x?.amount||'';
+  $('note').value=x?.note||'';
+  $('date').value=x?.date||today();
+  $('due').value=x?.due||today();
+  $('fullDate').value=x?.payments?.[0]?.date||today();
+  $('recurring').checked=!!x?.recurring;
+  $('fully').checked=false;
+  if(x?.payments?.length){$('fully').disabled=true;$('fully').parentElement.insertAdjacentHTML('afterend','<small class="muted">Los pagos existentes se corrigen desde el detalle de la cuenta.</small>');}
+  financeSelectType(chosen,x?.category);
+  $('fully').onchange=financeFullFields;
+  $('receiptPick').onchange=function(){
+    const f=this.files?.[0];selectedReceipt=null;
+    if(!f)return;
+    if(!(f.type.startsWith('image/')||f.type==='application/pdf')||f.size>receiptMaxSize){
+      $('err').textContent='Usa una imagen o PDF de hasta 8 MB.';this.value='';return;
+    }
+    $('err').textContent='';selectedReceipt=f;$('receiptHelp').textContent='Archivo seleccionado: '+f.name;
+  };
+  financeModalInitial=JSON.stringify(Array.from($('financeForm').querySelectorAll('input,select,textarea')).filter(n=>n.type!=='file').map(n=>[n.id,n.type==='checkbox'?n.checked:n.value]));
+}
+function financeFullFields(){$('fullfields').style.display=$('fully').checked?'block':'none';}
+function financeSelectType(kind,existingCategory){
+  const t=$('type');if(!t)return;
+  const current=existingCategory||$('cat').value;
+  t.value=kind;
+  const names=kind==='income'?['Sueldo','Honorarios','Ventas','Otros']:
+   ['Luz','Agua','Gas','Internet','Plan celular','Arriendo','Dividendo','Contribuciones','Bencina','Diésel','Parafina','Supermercado','Alimentación','Transporte','Salud','Educación','Crédito','Tarjeta','Otros'];
+  $('cat').replaceChildren();
+  names.forEach(n=>{const op=document.createElement('option');op.value=n;op.textContent=n;$('cat').append(op);});
+  $('cat').value=names.includes(current)?current:kind==='income'?'Sueldo':kind==='bill'?'Luz':'Supermercado';
+  $('billfields').style.display=kind==='bill'?'block':'none';
+  $('dateLabel').textContent=kind==='bill'?'Fecha de emisión / registro':'Fecha del movimiento';
+  $('noteLabel').textContent=kind==='income'?'¿De dónde recibiste el dinero?':kind==='bill'?'Empresa o servicio':'Comercio o detalle';
+  $('financeForm').querySelectorAll('[data-finance-type]').forEach(b=>b.classList.toggle('selected',b.dataset.financeType===kind));
+  $('financeForm').querySelector('button[type="submit"]').textContent='Guardar '+(kind==='bill'?'cuenta':kind==='income'?'ingreso':'gasto');
+  $('fullfields').style.display=kind==='bill'&&$('fully').checked?'block':'none';
+}
+openEntryForm=financeForm;
+async function financeSave(){
+  const form=$('financeForm');if(!form)return;
+  const type=$('type').value,amount=Number($('amt').value),date=$('date').value,due=type==='bill'?$('due').value:'';
+  if(!Number.isSafeInteger(amount)||amount<=0||!date||(type==='bill'&&!due)){
+    $('err').textContent='Ingresa un monto válido y completa las fechas.';return;
+  }
+  const old=db.items.find(z=>z.id===editing);
+  if(old?.type==='bill'&&old.payments?.length&&type!=='bill'){
+    $('err').textContent='No puedes cambiar el tipo de una cuenta con abonos. Corrige primero sus pagos.';return;
+  }
+  if(type==='bill'&&old&&paid(old)>amount){
+    $('err').textContent='El monto no puede ser menor que los pagos ya registrados.';return;
+  }
+  const x={id:old?.id||id(),type,amount,date,due,category:$('cat').value,note:$('note').value.trim(),
+    payments:type==='bill'&&old?.type==='bill'?(old.payments||[]).map(p=>({...p})):[],
+    ...(old?.receipt?{receipt:old.receipt}:{}),
+    recurring:type==='bill'&&$('recurring').checked,seriesId:old?.seriesId||old?.id||''};
+  if(type==='bill'&&$('fully').checked&&owed(x)>0){
+    x.payments.push({id:id(),date:$('fullDate').value||date,amount:owed(x),method:$('fullMethod').value});
+  }
+  if(financeDedupeCheck(x)&&!confirm('Ya hay un registro muy parecido con el mismo importe, fecha y detalle. ¿Guardar otro igualmente?'))return;
+  const file=selectedReceipt;
+  if(file){
+    try{await receiptStore(x.id,file);x.receipt={name:file.name,mime:file.type,size:file.size};}
+    catch(e){$('err').textContent='El comprobante no se pudo guardar. Libera espacio o retira el adjunto.';return;}
+  }
+  if(old)db.items[db.items.indexOf(old)]=x;else db.items.push(x);
+  const next=financeFutureBill(x);
+  try{persist();}catch(e){$('err').textContent='No se pudieron guardar los datos. Revisa el almacenamiento disponible.';return;}
+  financeCloseWithoutPrompt();render();queueReminderSync();
+  financeNotify(next?'Guardado. Se creó la cuenta pendiente del próximo mes.':'Registro guardado correctamente.');
+}
+save=financeSave;
+function financePaymentForm(key,payId=null){
+  const x=db.items.find(z=>z.id===key);if(!x||x.type!=='bill')return;
+  const p=(x.payments||[]).find(v=>v.id===payId),max=owed(x)+(p?.amount||0);
+  if(!p&&max<=0){financeNotify('Esta cuenta ya está pagada.');return;}
+  modal('<form id="financePayment" onsubmit="event.preventDefault();financeSavePayment(\''+esc(key)+'\',\''+esc(payId||'')+'\')">'+
+  '<div class="row"><h2>'+(p?'Corregir abono':'Registrar abono')+'</h2><button type="button" class="closeX" onclick="dismissSheet()">×</button></div>'+
+  '<p>Saldo disponible para abonar: <strong>'+money(max)+'</strong></p>'+
+  '<label for="payAmt">Monto pagado</label><input id="payAmt" type="number" min="1" step="1" max="'+max+'" required>'+
+  '<label for="payDate">Fecha real del pago</label><input type="date" id="payDate" required>'+
+  '<label for="method">Medio de pago</label><select id="method"><option>Transferencia</option><option>Débito</option><option>Crédito</option><option>Efectivo</option><option>Otro</option></select>'+
+  '<label for="paymentReceipt">Comprobante de este abono (opcional)</label><input id="paymentReceipt" type="file" accept="image/*,application/pdf">'+
+  '<small class="muted">'+(p?.receipt?'Comprobante existente: '+esc(p.receipt.name):'Foto o PDF hasta 8 MB')+'</small>'+
+  '<div class="error" id="err" role="alert"></div><button type="submit" class="btn primary full">Guardar pago</button></form>');
+  $('payAmt').value=p?.amount||max;
+  $('payDate').value=p?.date||today();
+  $('method').value=p?.method||'Transferencia';
+  financeModalInitial=JSON.stringify(Array.from($('financePayment').querySelectorAll('input,select')).filter(n=>n.type!=='file').map(n=>[n.id,n.value]));
+}
+payment=function(key){financePaymentForm(key);};
+async function financeSavePayment(key,payId=''){
+  const x=db.items.find(z=>z.id===key);if(!x||x.type!=='bill')return;
+  const old=(x.payments||[]).find(p=>p.id===payId);
+  const amount=Number($('payAmt').value),date=$('payDate').value,max=owed(x)+(old?.amount||0);
+  if(!Number.isSafeInteger(amount)||amount<=0||amount>max||!date){$('err').textContent='Revisa el monto y la fecha del abono.';return;}
+  const file=$('paymentReceipt').files?.[0];
+  if(file&&(!(file.type.startsWith('image/')||file.type==='application/pdf')||file.size>receiptMaxSize)){$('err').textContent='Archivo inválido: máximo 8 MB, foto o PDF.';return;}
+  const pay={id:old?.id||id(),amount,date,method:$('method').value,...(old?.receipt?{receipt:old.receipt}:{})};
+  if(file){
+    try{await receiptStore('payment:'+pay.id,file);pay.receipt={name:file.name,mime:file.type,size:file.size};}
+    catch(e){$('err').textContent='No se pudo guardar el comprobante. No se registró el abono.';return;}
+  }
+  if(old)x.payments[x.payments.indexOf(old)]=pay;else x.payments.push(pay);
+  const next=financeFutureBill(x);persist();financeCloseWithoutPrompt();render();queueReminderSync();
+  financeNotify(next?'Abono guardado y cuenta siguiente creada.':'Abono guardado correctamente.');
+}
+savePayment=function(key){financeSavePayment(key);};
+function financeDeletePayment(key,payId){
+  const x=db.items.find(z=>z.id===key);const p=x?.payments?.find(z=>z.id===payId);if(!p)return;
+  if(!confirm('¿Eliminar este abono de '+money(p.amount)+'? El saldo de la cuenta aumentará.'))return;
+  x.payments=x.payments.filter(z=>z.id!==payId);persist();receiptDelete('payment:'+p.id).catch(()=>{});
+  financeCloseWithoutPrompt();financeDetail(key);queueReminderSync();financeNotify('Abono eliminado. Saldo actualizado.');
+}
+function financeDetail(key){
+  const x=db.items.find(z=>z.id===key);if(!x)return;
+  const bill=x.type==='bill';
+  modal('<div class="row"><h2>'+esc(x.category)+'</h2><button class="closeX" onclick="dismissSheet()" aria-label="Cerrar">×</button></div>'+
+   '<p class="muted">'+esc(x.note||financeRecordType(x))+'</p>'+
+   '<h2>'+(bill?'Monto de la cuenta: ':'Monto: ')+money(x.amount)+'</h2>'+
+   '<p class="muted">'+(bill?'Vence '+financeDateText(x.due)+' · '+state(x):financeDateText(x.date))+'</p>'+
+   (bill?'<div class="financeTotals"><span>Abonado: '+money(paid(x))+'</span><strong>Por pagar: '+money(owed(x))+'</strong></div><h2>Pagos de esta cuenta</h2>'+
+   ((x.payments||[]).length?x.payments.map(p=>'<div class="financePaymentRow"><div><strong>'+money(p.amount)+'</strong><small>'+financeDateText(p.date)+' · '+esc(p.method||'Otro')+'</small></div><div class="financePaymentButtons">'+
+   (p.receipt?'<button onclick="financeOpenReceipt(\'payment:'+esc(p.id)+'\',\''+esc(p.receipt.name)+'\')">📎</button>':'')+
+   '<button onclick="financePaymentForm(\''+esc(key)+'\',\''+esc(p.id)+'\')">Editar</button><button onclick="financeDeletePayment(\''+esc(key)+'\',\''+esc(p.id)+'\')">Eliminar</button></div></div>').join(''):'<p class="muted">Todavía no registras abonos.</p>'):'')+
+   '<div class="actions">'+(bill&&owed(x)>0?'<button class="btn primary" onclick="financePaymentForm(\''+esc(key)+'\')">＋ Abonar o pagar</button>':'')+
+   '<button class="btn" onclick="financeForm(\''+x.type+'\',\''+esc(key)+'\')">Editar registro</button>'+
+   '<button class="btn" onclick="remove(\''+esc(key)+'\')">Eliminar</button></div>'+
+   '<div class="actions"><button class="btn" onclick="financeAttachMain(\''+esc(key)+'\')">'+(x.receipt?'Cambiar comprobante':'📎 Añadir comprobante')+'</button>'+
+   (x.receipt?'<button class="btn" onclick="financeOpenReceipt(\''+esc(key)+'\',\''+esc(x.receipt.name)+'\')">Ver comprobante</button>':'')+'</div>');
+}
+detail=financeDetail;
+async function financeAttachMain(key){
+  const x=db.items.find(z=>z.id===key);if(!x)return;
+  const picker=document.createElement('input');picker.type='file';picker.accept='image/*,application/pdf';
+  picker.onchange=async()=>{
+    const file=picker.files?.[0];if(!file)return;
+    if(!(file.type.startsWith('image/')||file.type==='application/pdf')||file.size>receiptMaxSize){financeNotify('Usa foto o PDF hasta 8 MB.',true);return;}
+    try{await receiptStore(x.id,file);x.receipt={name:file.name,mime:file.type,size:file.size};persist();financeDetail(key);financeNotify('Comprobante guardado.');}
+    catch(e){financeNotify('No se pudo guardar el archivo.',true);}
+  };picker.click();
+}
+async function financeOpenReceipt(fileKey,fileName){
+  const blob=await receiptRead(fileKey);
+  if(!blob){financeNotify('El comprobante no está disponible en este teléfono.',true);return;}
+  if(blob.type.startsWith('image/')){
+    const url=URL.createObjectURL(blob);
+    modal('<div class="row"><h2>Comprobante</h2><button class="closeX" onclick="dismissSheet()">×</button></div>'+
+      '<img id="financePreview" alt="Comprobante" style="max-width:100%;max-height:65vh;object-fit:contain">'+
+      '<button class="btn full" id="financeShare">Compartir archivo</button>');
+    $('financePreview').src=url;
+    $('financeShare').onclick=()=>shareMobile(fileName,blob,blob.type);
+    setTimeout(()=>URL.revokeObjectURL(url),45000);
+  }else await shareMobile(fileName||'comprobante.pdf',blob,'application/pdf');
+}
+const financeOldRemove=remove;
+remove=function(key){
+  const x=db.items.find(z=>z.id===key);if(!x)return;
+  if(!confirm('¿Eliminar este registro y todos sus pagos? Esta acción no se puede deshacer.'))return;
+  db.items=db.items.filter(z=>z.id!==key);persist();
+  receiptDelete(key).catch(()=>{});
+  (x.payments||[]).forEach(p=>receiptDelete('payment:'+p.id).catch(()=>{}));
+  financeCloseWithoutPrompt();render();queueReminderSync();financeNotify('Registro eliminado.');
+};
+function financeList(items){
+  if(!items.length)return '<div class="empty">No hay registros en esta sección.</div>';
+  return items.map(x=>{
+    const bill=x.type==='bill',value=bill?owed(x):x.amount;
+    return '<div class="line" data-id="'+esc(x.id)+'" role="button" tabindex="0"><div class="ico">'+(icons[x.category]||'💳')+'</div>'+
+     '<div class="detail"><strong>'+esc(x.category)+'</strong><small>'+esc(x.note||financeRecordType(x))+' · '+financeDateText(bill?x.due:x.date)+'</small>'+
+     (bill?'<span class="tag '+(state(x)==='Vencida'?'late':'')+'">'+(state(x)==='Vencida'?'Vencida':'Por pagar')+'</span>':'')+
+     '</div><span class="amount '+(x.type==='income'?'positive':bill&&state(x)==='Vencida'?'bad':'')+'">'+
+     (bill?(state(x)==='Pagada'?'Pagada '+money(x.amount):'Por pagar '+money(value)):x.type==='income'?'+'+money(value):'−'+money(value))+'</span></div>';
+  }).join('');
+}
+list=financeList;
+function financeRecent(){
+  const t=totals();
+  const recent=db.items.filter(x=>x.type!=='bill'&&thisMonth(x.date)).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+  return monthbar()+'<section class="card balance"><small>Balance de ingresos y gastos del mes</small>'+
+    '<strong class="big">'+money(t.income-t.expenses)+'</strong><div class="statgrid">'+
+    '<div class="statcard"><div class="statIcon">↑</div><div><small>Ingresos</small><strong>'+money(t.income)+'</strong></div></div>'+
+    '<div class="statcard out"><div class="statIcon">↓</div><div><small>Gastos</small><strong>'+money(t.expenses)+'</strong></div></div></div></section>'+
+    '<div class="financeQuick"><button class="btn primary" onclick="openEntryForm(\'expense\')">＋ Gasto</button>'+
+    '<button class="btn" onclick="openEntryForm(\'income\')">＋ Ingreso</button>'+
+    '<button class="btn" onclick="openEntryForm(\'bill\')">＋ Cuenta</button></div>'+
+    '<section class="card"><div class="row"><h2>Por pagar</h2><button onclick="financeGo(\'cuentas\')">Ver todas</button></div>'+
+    '<div class="financeTotals"><strong>'+money(t.pending)+' pendientes</strong><span class="bad">'+money(t.late)+' vencidos</span></div>'+
+    list(bills('Pendientes',3))+'</section>'+
+    '<section class="card"><div class="row"><h2>Últimos movimientos</h2><button onclick="financeGo(\'movimientos\')">Ver todos</button></div>'+list(recent)+'</section>'+
+    '<section class="card"><h2>Gráfico de gastos</h2><button class="btn full" onclick="financeGo(\'estadisticas\')">Ver análisis por categoría</button></section>';
+}
+summary=financeRecent;
+function financeGo(name){tab=name;render();}
+function financeHistory(){
+  const q=financeListQuery.toLowerCase();
+  let arr=db.items.filter(x=>x.type!=='bill').map(x=>({...x,entryId:x.id}));
+  for(const x of db.items.filter(x=>x.type==='bill'))for(const p of x.payments||[]){
+    arr.push({id:x.id,entryId:x.id,category:x.category,type:'expense',date:p.date,amount:p.amount,
+      note:'Abono · '+(x.note||x.category),paymentId:p.id,payments:[],receipt:p.receipt});
+  }
+  arr=arr.filter(x=>(!q||(x.category+' '+(x.note||'')+' '+x.amount).toLowerCase().includes(q))&&
+    (financeListCategory==='Todas'||x.category===financeListCategory)&&
+    (financeListMonth==='Todos'||String(x.date).slice(0,7)===financeListMonth));
+  arr.sort((a,b)=>b.date.localeCompare(a.date));
+  const page=arr.slice(0,historyLimit);
+  return '<section class="card"><h2>Movimientos</h2><label for="financeSearch">Buscar comercio, categoría o monto</label>'+
+   '<input id="financeSearch" placeholder="Buscar movimientos..." value="'+esc(financeListQuery)+'" oninput="financeFilterSearch(this.value)">'+
+   '<div class="financeFilterRow"><select aria-label="Filtrar categoría" onchange="financeListCategory=this.value;historyLimit=80;render()">'+
+   '<option value="Todas">Todas las categorías</option>'+Array.from(new Set(db.items.map(x=>x.category))).sort().map(c=>'<option value="'+esc(c)+'"'+(financeListCategory===c?' selected':'')+'>'+esc(c)+'</option>').join('')+'</select>'+
+   '<input type="month" aria-label="Filtrar mes" value="'+(financeListMonth==='Todos'?'':financeListMonth)+'" onchange="financeListMonth=this.value||\'Todos\';historyLimit=80;render()"></div>'+
+   '<small class="muted">'+page.length+' de '+arr.length+' movimientos</small>'+
+   page.map(x=>'<div class="financeHistoryRow" data-finance-history="'+esc(x.entryId)+'"'+(x.paymentId?' data-finance-payment="'+esc(x.paymentId)+'"':'')+'>'+
+     '<div class="line" onclick="'+(x.paymentId?'financeDetail(\''+esc(x.entryId)+'\')':'financeDetail(\''+esc(x.id)+'\')')+'"><div class="ico">'+(icons[x.category]||'💳')+'</div>'+
+     '<div class="detail"><strong>'+esc(x.category)+'</strong><small>'+esc(x.note||'')+' · '+financeDateText(x.date)+'</small></div>'+
+     '<span class="amount '+(x.type==='income'?'positive':'')+'">'+(x.type==='income'?'+':'−')+money(x.amount)+'</span></div>'+
+     (x.paymentId?'<button class="btn" onclick="financePaymentForm(\''+esc(x.entryId)+'\',\''+esc(x.paymentId)+'\')">Ver abono</button>':'')+'</div>').join('')+
+   (arr.length>page.length?'<button class="btn full" onclick="moreHistory()">Mostrar más</button>':'')+'</section>';
+}
+function financeFilterSearch(q){
+  financeListQuery=q;
+  const cursor=q.length;
+  tab='movimientos';render();
+  const input=$('financeSearch');if(input){input.focus();input.setSelectionRange(cursor,cursor);}
+}
+movements=financeHistory;
+
+function financeExpandRecurring(){
+  const cutoff=new Date();cutoff.setDate(cutoff.getDate()+40);
+  const series=new Map();
+  db.items.filter(x=>x.type==='bill'&&x.recurring).forEach(x=>{
+    const root=x.seriesId||x.id,prev=series.get(root);
+    if(!prev||x.due>prev.due)series.set(root,x);
+  });
+  let added=0;
+  for(const last of series.values()){
+    let base=last,iterations=0;
+    while(base.due&&new Date(base.due+'T00:00:00')<=cutoff&&iterations<12){
+      const nextDue=financeMonthlyNext(base.due);
+      if(nextDue<=base.due)break;
+      let next=db.items.find(x=>x.type==='bill'&&(x.seriesId||x.id)===(base.seriesId||base.id)&&x.due===nextDue);
+      if(!next){
+        next={id:id(),type:'bill',amount:base.amount,date:today(),due:nextDue,category:base.category,note:base.note,
+          payments:[],recurring:true,seriesId:base.seriesId||base.id};
+        db.items.push(next);added++;
+      }
+      base=next;iterations++;
+    }
+  }
+  if(added){persist();queueReminderSync();}
+  return added;
+}
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden&&financeExpandRecurring()){render();financeNotify('Se agregaron las cuentas mensuales pendientes.');}
+});
+const financeBaseRender=render;
+render=function(){
+  financeBaseRender();
+  document.querySelectorAll('[data-id]').forEach(n=>{
+    n.setAttribute('role','button');n.setAttribute('tabindex','0');
+    n.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();financeDetail(n.dataset.id);}});
+  });
+};
+function financeBackupFileKeys(){
+  const keys=[];
+  db.items.forEach(x=>{if(x.receipt)keys.push(x.id);(x.payments||[]).forEach(p=>{if(p.receipt)keys.push('payment:'+p.id);});});
+  return keys;
+}
+backup=async function(){
+  const attachments={};
+  try{
+    for(const key of financeBackupFileKeys()){
+      const blob=await receiptRead(key);
+      if(!blob)throw Error('Falta un comprobante del registro '+key+'. No se generó una copia incompleta.');
+      attachments[key]=await blobDataUrl(blob);
+    }
+    await shareMobile('Respaldo_Mis_Finanzas_'+today()+'.json',
+      new Blob([JSON.stringify({schema:4,data:db,attachments})],{type:'application/json'}),'application/json');
+    financeNotify('Copia completa lista para guardar o compartir.');
+  }catch(e){financeNotify('No se pudo crear la copia completa: '+e.message,true);}
+};
+csv=async function(){
+  const rows=[['Fecha','Tipo','Categoría','Monto','Detalle','Vencimiento','Estado','Saldo pendiente','Comprobante']];
+  db.items.forEach(x=>{
+    rows.push([x.date,financeRecordType(x),x.category,x.amount,x.note,x.due||'',state(x),x.type==='bill'?owed(x):'',x.receipt?.name||'']);
+    (x.payments||[]).forEach(p=>rows.push([p.date,'Abono',x.category,p.amount,p.method||'',x.due||'','','',p.receipt?.name||'']));
+  });
+  const csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');
+  await shareMobile('Mis_Finanzas_'+today()+'.csv',new Blob([csv],{type:'text/csv;charset=utf-8'}),'text/csv');
+};
+$('file').onchange=async function(e){
+  const file=e.target.files?.[0];if(!file)return;
+  try{
+    const record=JSON.parse(await file.text()),next=record.data||record;
+    if(!Array.isArray(next.items)||!Array.isArray(db.items))throw Error('Archivo de respaldo incompatible.');
+    if(!confirm('Se reemplazarán los registros actuales. ¿Quieres continuar?'))return;
+    const attachments=record.attachments||{};
+    for(const key of Object.keys(attachments))await receiptStore(key,dataUrlBlob(attachments[key]));
+    db=next;persist();queueReminderSync();render();
+    financeNotify('Respaldo recuperado correctamente.');
+  }catch(e){financeNotify('No se pudo recuperar la copia: '+e.message,true);}
+  finally{e.target.value='';}
+};
+financeExpandRecurring();
+render();
 </script></body></html>
