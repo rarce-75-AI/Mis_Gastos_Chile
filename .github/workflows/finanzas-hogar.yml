@@ -56,6 +56,12 @@ jobs:
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" sign --ks ../finanzas-signing.jks --ks-key-alias finanzas --ks-pass env:FINANZAS_STORE_PASSWORD --key-pass env:FINANZAS_STORE_PASSWORD --out ../Mis-Gastos-Chile-Finanzas.apk app/build/outputs/apk/release/app-release-unsigned.apk
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose ../Mis-Gastos-Chile-Finanzas.apk
           rm -f ../finanzas-signing.jks
+      - name: Verificar ícono y nombre instalables en APK
+        run: |
+          test -s Mis-Gastos-Chile-Finanzas.apk
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging Mis-Gastos-Chile-Finanzas.apk | grep -E '^package:|^application-label:|^application-icon-'
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging Mis-Gastos-Chile-Finanzas.apk | grep -q "application-label:'Mis Gastos Chile'"
+          unzip -l Mis-Gastos-Chile-Finanzas.apk | grep 'ic_launcher' | head -15
       - name: Publicar APK en Releases
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
