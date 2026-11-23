@@ -1,0 +1,8 @@
+{
+  "appId": "cl.rarce.finanzashogar",
+  "appName": "Mis Gastos Chile - Nueva",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}
