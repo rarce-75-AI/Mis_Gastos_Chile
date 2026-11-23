@@ -10,5 +10,5 @@ check('Inicio carga sin errores',()=>{assert.equal(errs.length,0,errs.join('\n')
 check('Navegación a Cuentas',()=>{d.querySelector('[data-tab="cuentas"]').click();assert(d.querySelector('#app').textContent.includes('Cuentas por pagar'));});
 check('Abrir formulario de cuenta',()=>{d.querySelector('button[onclick*="openEntryForm"]').click();assert(d.querySelector('#overlay.on'));assert(d.querySelector('#amt'));});
 check('Guardar cuenta atrasada',()=>{d.querySelector('#amt').value='48000';d.querySelector('#due').value='2026-10-15';w.save();assert(!d.querySelector('#overlay.on'));assert(d.querySelector('#app').textContent.includes('48.000'));});
-check('Navegar a inicio',()=>{d.querySelector('[data-tab="inicio"]').click();assert(d.querySelector('#app').textContent.includes('BALANCE DEL MES'));});
+check('Navegar a inicio',()=>{d.querySelector('[data-tab="inicio"]').click();assert(d.querySelector('#app').textContent.includes('Saldo total disponible del mes'));});
 if(errs.length){console.error(errs.join('\n'));process.exitCode=1}
