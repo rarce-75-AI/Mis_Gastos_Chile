@@ -29,6 +29,7 @@ jobs:
       - name: Preparar Capacitor
         run: |
           npm install
+          node tests/smoke.cjs
           npx cap add android
           npx cap sync android
       - name: Compilar APK de prueba
