@@ -31,7 +31,14 @@ body{background:#0d1729}header{background:linear-gradient(115deg,#083f37,#0c2337
 #financeForm button[type=submit],#financePayment button[type=submit]{margin-top:16px}
 @media(max-width:370px){.financeQuick button{font-size:11px}.financePaymentButtons button{font-size:11px}}
 </style>
-</head><body><header><strong>Mis Finanzas</strong><br><small>Tus finanzas, bajo control</small></header><main id="app"></main><nav id="nav"></nav><div class="overlay" id="overlay"><div class="sheet" id="sheet"></div></div><input type="file" id="file" accept=".json"><script>
+<style id="subStyles">
+.subRow{border-top:1px solid #34455c;padding:15px 0}
+.subRow small{display:block;margin:6px 0;color:#bacadd}
+.subRow .actions{margin:8px 0 0}
+.subRow .actions .btn{flex:1;min-width:90px;font-size:13px;padding:9px}
+#subForm input,#subForm select{font-size:16px}
+#subForm button[type=submit]{margin-top:20px}
+</style></head><body><header><strong>Mis Finanzas</strong><br><small>Tus finanzas, bajo control</small></header><main id="app"></main><nav id="nav"></nav><div class="overlay" id="overlay"><div class="sheet" id="sheet"></div></div><input type="file" id="file" accept=".json"><script>
 'use strict';
 const KEY='mis_gastos_chile_capacitor_v2',cats=['Luz','Agua','Gas','Internet','Plan celular','Arriendo','Dividendo','Contribuciones','Bencina','Diésel','Parafina','Supermercado','Alimentación','Transporte','Salud','Educación','Crédito','Tarjeta','Otros'],icons={'Luz':'⚡','Agua':'💧','Gas':'🔥','Internet':'🌐','Plan celular':'📱','Bencina':'⛽','Diésel':'⛽','Parafina':'🛢️','Supermercado':'🛒','Sueldo':'💰'},groups=['Servicios','Alimentación','Transporte','Vivienda','Otros'],colors=['#539dff','#46dba5','#ad95f8','#f1b26c','#ff8791'];
 const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'),today=()=>iso(new Date()),id=()=>Date.now()+'-'+Math.random().toString(36).slice(2),money=n=>(db.currency==='CLP'?'$':db.currency+' ')+Math.round(n||0).toLocaleString('es-CL'),paid=x=>(x.payments||[]).reduce((a,p)=>a+Number(p.amount||0),0),owed=x=>Math.max(0,x.amount-paid(x)),state=x=>x.type!=='bill'?'':owed(x)===0?'Pagada':x.due<today()?'Vencida':'Pendiente',group=c=>['Luz','Agua','Gas','Internet','Plan celular'].includes(c)?0:['Supermercado','Alimentación'].includes(c)?1:['Bencina','Diésel','Parafina','Transporte'].includes(c)?2:['Arriendo','Dividendo','Contribuciones'].includes(c)?3:4;
@@ -370,11 +377,16 @@ function financeMonthlyNext(d){
   return iso(new Date(year,monthNo,Math.min(day,last)));
 }
 function financeRecordType(x){return x.type==='income'?'Ingreso':x.type==='bill'?'Cuenta pendiente':'Gasto pagado';}
+function financeRecurringDue(x){
+  if(!x.subscriptionDay)return financeMonthlyNext(x.due);
+  const [y,m]=x.due.split('-').map(Number);
+  return iso(new Date(y,m,Math.min(Number(x.subscriptionDay),new Date(y,m+1,0).getDate())));
+}
 function financeFutureBill(x){
   if(!x||x.type!=='bill'||!x.recurring||owed(x)>0||!x.due)return null;
-  const nextDue=financeMonthlyNext(x.due),root=x.seriesId||x.id;
+  const nextDue=financeRecurringDue(x),root=x.seriesId||x.id;
   if(db.items.some(z=>z.type==='bill'&&(z.seriesId||z.id)===root&&z.due===nextDue))return null;
-  const newBill={id:id(),type:'bill',amount:x.amount,date:today(),due:nextDue,category:x.category,note:x.note||'',payments:[],recurring:true,seriesId:root};
+  const newBill={id:id(),type:'bill',amount:x.amount,date:today(),due:nextDue,category:x.category,note:x.note||'',payments:[],recurring:true,seriesId:root,...(x.subscriptionId?{subscriptionId:x.subscriptionId,subscriptionService:x.subscriptionService,subscriptionPlan:x.subscriptionPlan,subscriptionDay:x.subscriptionDay,subscriptionCustomService:x.subscriptionCustomService,subscriptionCustomPlan:x.subscriptionCustomPlan}:{})};
   db.items.push(newBill);return newBill;
 }
 function financeDedupeCheck(x){
@@ -472,7 +484,7 @@ async function financeSave(){
   const x={id:old?.id||id(),type,amount,date,due,category:$('cat').value,note:$('note').value.trim(),
     payments:type==='bill'&&old?.type==='bill'?(old.payments||[]).map(p=>({...p})):[],
     ...(old?.receipt?{receipt:old.receipt}:{}),
-    recurring:type==='bill'&&$('recurring').checked,seriesId:old?.seriesId||old?.id||''};
+    recurring:type==='bill'&&$('recurring').checked,seriesId:old?.seriesId||old?.id||'', ...(old?.subscriptionId&&type==='bill'?{subscriptionId:old.subscriptionId,subscriptionService:old.subscriptionService,subscriptionPlan:old.subscriptionPlan,subscriptionDay:old.subscriptionDay,subscriptionCustomService:old.subscriptionCustomService,subscriptionCustomPlan:old.subscriptionCustomPlan}:{})};
   if(type==='bill'&&$('fully').checked&&owed(x)>0){
     x.payments.push({id:id(),date:$('fullDate').value||date,amount:owed(x),method:$('fullMethod').value});
   }
@@ -655,12 +667,12 @@ function financeExpandRecurring(){
   for(const last of series.values()){
     let base=last,iterations=0;
     while(base.due&&new Date(base.due+'T00:00:00')<=cutoff&&iterations<12){
-      const nextDue=financeMonthlyNext(base.due);
+      const nextDue=financeRecurringDue(base);
       if(nextDue<=base.due)break;
       let next=db.items.find(x=>x.type==='bill'&&(x.seriesId||x.id)===(base.seriesId||base.id)&&x.due===nextDue);
       if(!next){
         next={id:id(),type:'bill',amount:base.amount,date:today(),due:nextDue,category:base.category,note:base.note,
-          payments:[],recurring:true,seriesId:base.seriesId||base.id};
+          payments:[],recurring:true,seriesId:base.seriesId||base.id,...(base.subscriptionId?{subscriptionId:base.subscriptionId,subscriptionService:base.subscriptionService,subscriptionPlan:base.subscriptionPlan,subscriptionDay:base.subscriptionDay,subscriptionCustomService:base.subscriptionCustomService,subscriptionCustomPlan:base.subscriptionCustomPlan}:{})};
         db.items.push(next);added++;
       }
       base=next;iterations++;
@@ -722,4 +734,4 @@ $('file').onchange=async function(e){
 };
 financeExpandRecurring();
 render();
-</script><script src="./statement-xlsx.js"></script><script src="./bank-import.js"></script></body></html>
+</script><script src="./statement-xlsx.js"></script><script src="./bank-import.js"></script><script src="./subscriptions.js"></script></body></html>

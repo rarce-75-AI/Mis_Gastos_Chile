@@ -166,4 +166,51 @@ check('Importador reconoce fechas Excel y montos bancarios',()=>{
   assert.equal(w.bankMoney('$ 1.014.270'),1014270);
   assert.equal(w.bankMoney('1,234.50'),1235);
 });
+
+w.eval(fs.readFileSync('www/subscriptions.js','utf8'));
+check('Catálogo incluye suscripciones solicitadas y Google One',()=>{
+  const names=w.eval('Object.keys(subCatalog)');
+  ['Netflix','Spotify','Max (HBO Max)','Disney+','ChatGPT','Amazon Prime','Google One'].forEach(name=>assert(names.includes(name),name));
+  assert(w.eval('subCatalog["Google One"].includes("2 TB")'));
+});
+check('Suscripción registra plan, importe y día de cobro',()=>{
+  w.subForm();
+  d.querySelector('#subService').value='Google One';w.subUpdatePlans();
+  d.querySelector('#subPlan').value='2 TB';
+  d.querySelector('#subAmount').value='12000';
+  d.querySelector('#subDay').value='31';
+  d.querySelector('#subFirstMonth').value='2026-11';
+  w.subSave();
+  const entries=w.eval('db.items.filter(x=>x.subscriptionService==="Google One")');
+  assert(entries.length>0);
+  assert(entries.every(x=>x.subscriptionPlan==='2 TB'&&x.subscriptionDay===31));
+  assert(entries.some(x=>x.due==='2026-11-30'));
+});
+check('El día 31 se mantiene después de febrero',()=>{
+  assert.equal(w.financeRecurringDue({due:'2027-02-28',subscriptionDay:31}),'2027-03-31');
+  assert.equal(w.financeRecurringDue({due:'2027-01-31',subscriptionDay:31}),'2027-02-28');
+});
+check('Suscripción se pausa conservando cobros anteriores',()=>{
+  const key=w.eval('db.items.find(x=>x.subscriptionService==="Google One").subscriptionId');
+  const before=w.eval('db.items.filter(x=>x.subscriptionId==='+JSON.stringify(key)+').length');
+  w.confirm=()=>true;w.subToggle(key);
+  assert(w.eval('db.items.filter(x=>x.subscriptionId==='+JSON.stringify(key)+').every(x=>!x.recurring)'));
+  assert.equal(w.eval('db.items.filter(x=>x.subscriptionId==='+JSON.stringify(key)+').length'),before);
+  w.subToggle(key);
+  assert(w.eval('db.items.some(x=>x.subscriptionId==='+JSON.stringify(key)+'&&x.recurring)'));
+});
+check('Cartola coincide con suscripción y se excluye para evitar doble gasto',()=>{
+  w.subForm();
+  d.querySelector('#subService').value='Netflix';w.subUpdatePlans();
+  d.querySelector('#subAmount').value='11990';
+  d.querySelector('#subDay').value='24';
+  d.querySelector('#subFirstMonth').value='2026-11';
+  w.subSave();
+  const rows=w.bankCsvRows('Fecha;Descripcion;Cargo;Abono;Saldo\n24-11-2026;Netflix.com;11.990;;200.000');
+  const matched=w.bankReadRows(rows,'netflix.csv');
+  assert.equal(matched.length,1);
+  assert.equal(matched[0].selected,false);
+  assert(matched[0].reason.includes('Netflix'));
+});
+
 if(errs.length){console.error(errs.join('\n'));process.exitCode=1}

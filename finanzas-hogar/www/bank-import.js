@@ -99,6 +99,29 @@ function bankReadRows(matrix,filename='cartola'){
       const count=manual.get(simple)||0;if(count)manual.set(simple,count-1);
     }
   }
+
+  // Un cargo de una suscripción todavía pendiente debe conciliarse, no contarse de nuevo.
+  // Por prudencia, aquí solo se marca para revisión; nunca se paga automáticamente.
+  for(const x of data){
+    if(x.flow!=='debit'||x.duplicate)continue;
+    const desc=bankNormalize(x.description);
+    const aliases={'Netflix':['NETFLIX'],'Spotify':['SPOTIFY'],'Max (HBO Max)':['HBO MAX','HBOMAX','MAX.COM'],
+      'Disney+':['DISNEY PLUS','DISNEY+'],'ChatGPT':['CHATGPT','OPENAI'],
+      'Amazon Prime':['AMAZON PRIME','PRIME VIDEO'],'Google One':['GOOGLE ONE','GOOGLEONE'],
+      'YouTube Premium':['YOUTUBE PREMIUM'],'Apple Music':['APPLE MUSIC'],'iCloud+':['ICLOUD'],
+      'Microsoft 365':['MICROSOFT 365'],'Crunchyroll':['CRUNCHYROLL'],'Paramount+':['PARAMOUNT']};
+    const match=db.items.find(z=>{
+      if(z.type!=='bill'||!z.subscriptionId||owed(z)<=0||owed(z)!==x.amount)return false;
+      const terms=aliases[z.subscriptionService]||[bankNormalize(z.subscriptionService)];
+      if(!terms.some(t=>t&&desc.includes(bankNormalize(t))))return false;
+      const diff=Math.abs(new Date(x.date+'T12:00:00')-new Date(z.due+'T12:00:00'))/86400000;
+      return diff<=7;
+    });
+    if(match){
+      x.duplicate=true;x.selected=false;x.kind='skip';
+      x.reason='Posible cobro de '+match.subscriptionService+' ya registrado como cuenta pendiente. Registra su pago desde Cuentas para evitar duplicarlo.';
+    }
+  }
   bankPreview=data;bankFilename=filename;bankPage=0;
   const ordered=[...data].filter(x=>x.balance!==null).sort((a,b)=>b.date.localeCompare(a.date));
   bankFileBalance=ordered[0]?{date:ordered[0].date,amount:ordered[0].balance,filename}:null;
