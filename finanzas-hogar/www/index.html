@@ -216,4 +216,110 @@ $('file').onchange=async e=>{
   finally{e.target.value='';}
 };
 
+
+/* Recordatorios de vencimiento: notificaciones programadas en el dispositivo */
+const REMINDERS_ENABLED_KEY='finanzas_reminders_enabled_v1';
+const REMINDER_IDS_KEY='finanzas_reminder_ids_v1';
+let remindersEnabled=localStorage.getItem(REMINDERS_ENABLED_KEY)==='yes';
+let reminderChain=Promise.resolve(), reminderTimer=null, reminderError='';
+function notificationsPlugin(){
+  const cap=window.Capacitor;
+  return cap?.Plugins?.LocalNotifications || (cap?.registerPlugin?cap.registerPlugin('LocalNotifications'):null);
+}
+function reminderId(accountId,days){
+  let h=2166136261;
+  for(const ch of accountId+'|'+days){h=Math.imul(h^ch.charCodeAt(0),16777619);}
+  return 100000000+(h>>>0)%900000000;
+}
+function reminderDate(due,days){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(due||''))return null;
+  const [y,m,d]=due.split('-').map(Number);
+  const date=new Date(y,m-1,d,9,0,0,0);
+  if(date.getFullYear()!==y||date.getMonth()!==m-1||date.getDate()!==d)return null;
+  date.setDate(date.getDate()-days);
+  return date;
+}
+function reminderPlan(){
+  const list=[];
+  if(!remindersEnabled)return list;
+  for(const x of db.items){
+    if(x.type!=='bill'||owed(x)<=0||!x.due)continue;
+    for(const days of [5,3]){
+      const at=reminderDate(x.due,days);
+      if(!at||at.getTime()<=Date.now())continue;
+      list.push({id:reminderId(x.id,days),title:'Cuenta por vencer: '+x.category,
+        body:'Faltan '+days+' días para pagar '+(x.note?x.note+' · ':'')+money(owed(x))+'.',
+        schedule:{at},channelId:'cuentas-vencimiento',extra:{source:'finanzas-cuentas',accountId:x.id,days}});
+    }
+  }
+  list.sort((a,b)=>a.schedule.at-b.schedule.at);
+  return list.slice(0,120);
+}
+async function syncReminders(){
+  const plugin=notificationsPlugin();
+  if(!plugin)return;
+  const granted=await plugin.checkPermissions();
+  if(granted.display!=='granted')return;
+  const previous=JSON.parse(localStorage.getItem(REMINDER_IDS_KEY)||'[]');
+  const targets=reminderPlan();
+  const ids=targets.map(x=>x.id);
+  if(previous.length)await plugin.cancel({notifications:previous.map(id=>({id}))});
+  if(targets.length){
+    await plugin.createChannel({id:'cuentas-vencimiento',name:'Recordatorios de cuentas',description:'Avisos de cuentas pendientes',importance:4,visibility:1});
+    await plugin.schedule({notifications:targets});
+  }
+  localStorage.setItem(REMINDER_IDS_KEY,JSON.stringify(ids));
+  reminderError='';
+}
+function queueReminderSync(){
+  if(reminderTimer)clearTimeout(reminderTimer);
+  reminderTimer=setTimeout(()=>{
+    reminderChain=reminderChain.catch(()=>{}).then(syncReminders).catch(e=>{reminderError=String(e.message||e);console.warn('Recordatorios:',e)});
+  },300);
+}
+async function setReminders(enabled){
+  const plugin=notificationsPlugin();
+  if(enabled){
+    if(!plugin){alert('Los recordatorios solo funcionan en la aplicación Android instalada.');return;}
+    const permission=await plugin.checkPermissions();
+    const allowed=permission.display==='granted'?permission:await plugin.requestPermissions();
+    if(allowed.display!=='granted'){alert('Activa las notificaciones de Mis Gastos Chile en Ajustes del teléfono.');return;}
+  }
+  remindersEnabled=enabled;
+  localStorage.setItem(REMINDERS_ENABLED_KEY,enabled?'yes':'no');
+  try{await syncReminders()}catch(e){reminderError=String(e.message||e);alert('No se pudieron configurar todos los avisos. Revisa los permisos de notificaciones en el teléfono.');}
+  render();
+}
+function reminderSettings(){
+  return '<section class="card"><h2>🔔 Avisos de cuentas por vencer</h2><p class="muted">Recibe un aviso 5 días y otro 3 días antes del vencimiento de tus cuentas pendientes, aunque no tengas la aplicación abierta.</p>'
+   +'<button class="btn '+(remindersEnabled?'':'primary')+' full" onclick="setReminders('+(!remindersEnabled)+')">'+(remindersEnabled?'Desactivar recordatorios':'Activar recordatorios')+'</button>'
+   +'<small class="muted" style="display:block;margin-top:10px">'+(remindersEnabled?'Recordatorios activados. Se actualizarán al registrar pagos o cambiar vencimientos.':'Debes autorizar las notificaciones de Android para recibirlos.')+'</small></section>';
+}
+const originalSettings=settings;
+settings=function(){return reminderSettings()+originalSettings();};
+
+const remindersSave=save;
+save=async function(){
+  await remindersSave();
+  queueReminderSync();
+};
+const remindersPayment=savePayment;
+savePayment=function(key){
+  remindersPayment(key);
+  queueReminderSync();
+};
+const remindersRemove=remove;
+remove=function(key){
+  remindersRemove(key);
+  queueReminderSync();
+};
+const oldRestore=$('file').onchange;
+$('file').onchange=async function(event){
+  await oldRestore(event);
+  queueReminderSync();
+};
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)queueReminderSync();});
+window.addEventListener('focus',queueReminderSync);
+queueReminderSync();
+
 </script></body></html>
