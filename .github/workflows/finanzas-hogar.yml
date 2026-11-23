@@ -1,4 +1,5 @@
 name: Compilar Finanzas Hogar V1.1
+# Firma privada configurada mediante GitHub Actions Secrets; no guardar claves en el repositorio.
 on:
   push:
     branches: [main]
