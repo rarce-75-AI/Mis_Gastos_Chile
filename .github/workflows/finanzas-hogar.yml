@@ -32,6 +32,8 @@ jobs:
           node tests/smoke.cjs
           npx cap add android
           npx cap sync android
+          python3 -m pip install --quiet cairosvg
+          python3 scripts/generate_icons.py
       - name: Compilar APK de prueba
         run: |
           cd android
