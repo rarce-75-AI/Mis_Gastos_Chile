@@ -11,4 +11,10 @@ check('Navegación a Cuentas',()=>{d.querySelector('[data-tab="cuentas"]').click
 check('Abrir formulario de cuenta',()=>{d.querySelector('button[onclick*="openEntryForm"]').click();assert(d.querySelector('#overlay.on'));assert(d.querySelector('#amt'));});
 check('Guardar cuenta atrasada',()=>{d.querySelector('#amt').value='48000';d.querySelector('#due').value='2026-10-15';w.save();assert(!d.querySelector('#overlay.on'));assert(d.querySelector('#app').textContent.includes('48.000'));});
 check('Navegar a inicio',()=>{d.querySelector('[data-tab="inicio"]').click();assert(d.querySelector('#app').textContent.includes('Saldo total disponible del mes'));});
+
+check('Cerrar formulario con X',()=>{w.openEntryForm('bill');assert(d.querySelector('#overlay.on'));d.querySelector('#sheet .row button').click();assert(!d.querySelector('#overlay.on'));});
+check('Cerrar formulario con Atrás',()=>{w.openEntryForm('bill');assert(d.querySelector('#overlay.on'));w.backInApp();assert(!d.querySelector('#overlay.on'));});
+check('Cerrar formulario con Escape',()=>{w.openEntryForm('bill');d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));assert(!d.querySelector('#overlay.on'));});
+check('Ajustes sencillos sin presupuesto',()=>{d.querySelector('[data-tab="ajustes"]').click();assert(d.querySelector('#app').textContent.includes('Guardar copia de seguridad'));assert(!d.querySelector('#app').textContent.includes('Guardar presupuesto'));});
+check('Volver a Inicio desde Ajustes',()=>{assert(w.backInApp());assert(d.querySelector('#app').textContent.includes('Saldo total disponible del mes'));});
 if(errs.length){console.error(errs.join('\n'));process.exitCode=1}
