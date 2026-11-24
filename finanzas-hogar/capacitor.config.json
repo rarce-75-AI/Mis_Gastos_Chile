@@ -1,8 +1,0 @@
-{
-  "appId": "cl.rarce.finanzashogar",
-  "appName": "Mis Finanzas",
-  "webDir": "www",
-  "server": {
-    "androidScheme": "https"
-  }
-}

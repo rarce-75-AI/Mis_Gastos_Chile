@@ -1,2 +1,0 @@
-# Mis Gastos Chile — Nueva interfaz
-Versión de prueba separada (`cl.rarce.finanzashogar`) para evitar sobrescribir los datos SQLite de la app anterior. Usa almacenamiento local web. Antes de desinstalar cualquier versión, exporta un respaldo JSON. APK generado desde GitHub Actions y publicado como prerelease.
