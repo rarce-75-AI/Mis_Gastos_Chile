@@ -20,6 +20,9 @@ jobs:
       - name: Descomprimir proyecto Kotlin
         run: |
           mkdir -p source
+          cat chunks/*.b64 | base64 -d > payload.tar.xz
+          test "$(wc -c < payload.tar.xz)" -eq 8256
+          echo 'dfc98cae945f265aa4f15503f111d27e544b1a87586588a7850f825dc6a0e512  payload.tar.xz' | sha256sum -c -
           xz -t payload.tar.xz
           tar -xJf payload.tar.xz -C source
       - name: Preparar Android SDK
