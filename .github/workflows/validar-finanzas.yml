@@ -1,0 +1,67 @@
+name: Validar Mis Finanzas
+on:
+  push:
+    branches: ['kimora/**']
+    paths: ['finanzas-hogar/**', '.github/workflows/finanzas-hogar.yml', '.github/workflows/validar-finanzas.yml']
+  pull_request:
+    branches: [main]
+    paths: ['finanzas-hogar/**', '.github/workflows/finanzas-hogar.yml', '.github/workflows/validar-finanzas.yml']
+permissions:
+  contents: read
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: finanzas-hogar
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Preparar y probar interfaz
+        run: |
+          npm install
+          npx esbuild src/statement-xlsx-entry.js --bundle --platform=browser --format=iife --minify --outfile=www/statement-xlsx.js
+          node tests/smoke.cjs
+      - name: Preparar proyecto Android
+        run: |
+          npx cap add android
+          npx cap sync android
+          python3 -m pip install --quiet cairosvg pyyaml
+          python3 scripts/generate_icons.py
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-35" "build-tools;35.0.0"
+      - name: Validar sintaxis de publicación
+        run: |
+          python3 - <<'PY'
+          import pathlib, subprocess, yaml
+          workflow = yaml.safe_load(pathlib.Path('../.github/workflows/finanzas-hogar.yml').read_text())
+          for job in workflow['jobs'].values():
+              for step in job.get('steps', []):
+                  if 'run' in step:
+                      subprocess.run(['bash', '-n'], input=step['run'], text=True, check=True)
+          PY
+      - name: Compilar APK y AAB para QA
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew --no-daemon assembleDebug bundleRelease
+          test -s app/build/outputs/apk/debug/app-debug.apk
+          test -s app/build/outputs/bundle/release/app-release.aab
+          unzip -t app/build/outputs/bundle/release/app-release.aab
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify app/build/outputs/apk/debug/app-debug.apk
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging app/build/outputs/apk/debug/app-debug.apk | grep -q "name='cl.rarce.finanzashogar'"
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging app/build/outputs/apk/debug/app-debug.apk | grep -q "application-label:'Mis Finanzas'"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Mis-Finanzas-QA-NO-PUBLICAR
+          path: |
+            finanzas-hogar/android/app/build/outputs/apk/debug/app-debug.apk
+            finanzas-hogar/android/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 7
