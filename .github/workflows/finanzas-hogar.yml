@@ -50,13 +50,18 @@ jobs:
       - name: Compilar APK firmado para futuras actualizaciones
         if: env.FINANZAS_KEYSTORE_B64 != ''
         run: |
-          printf '%s' "$FINANZAS_KEYSTORE_B64" | base64 --decode > finanzas-signing.jks
+          set -eu
+          trap 'rm -f "$RUNNER_TEMP/finanzas-signing.jks"' EXIT
+          printf '%s' "$FINANZAS_KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/finanzas-signing.jks"
           cd android
           chmod +x gradlew
-          ./gradlew --no-daemon assembleRelease
-          "$ANDROID_HOME/build-tools/35.0.0/apksigner" sign --ks ../finanzas-signing.jks --ks-key-alias finanzas --ks-pass env:FINANZAS_STORE_PASSWORD --key-pass env:FINANZAS_STORE_PASSWORD --out ../Mis-Finanzas.apk app/build/outputs/apk/release/app-release-unsigned.apk
+          ./gradlew --no-daemon assembleRelease bundleRelease
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" sign --ks "$RUNNER_TEMP/finanzas-signing.jks" --ks-key-alias finanzas --ks-pass env:FINANZAS_STORE_PASSWORD --key-pass env:FINANZAS_STORE_PASSWORD --out ../Mis-Finanzas.apk app/build/outputs/apk/release/app-release-unsigned.apk
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose ../Mis-Finanzas.apk
-          rm -f ../finanzas-signing.jks
+          cp app/build/outputs/bundle/release/app-release.aab ../Mis-Finanzas.aab
+          jarsigner -keystore "$RUNNER_TEMP/finanzas-signing.jks" -storepass:env FINANZAS_STORE_PASSWORD -keypass:env FINANZAS_STORE_PASSWORD ../Mis-Finanzas.aab finanzas
+          jarsigner -verify ../Mis-Finanzas.aab
+          unzip -l ../Mis-Finanzas.aab | grep -q 'base/manifest/AndroidManifest.xml'
       - name: Verificar ícono y nombre instalables en APK
         run: |
           test -s Mis-Finanzas.apk
@@ -64,10 +69,17 @@ jobs:
           "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging Mis-Finanzas.apk | grep -q "application-label:'Mis Finanzas'"
           "$ANDROID_HOME/build-tools/35.0.0/aapt" dump resources Mis-Finanzas.apk | grep -E 'mipmap/mis_finanzas_launcher|drawable/mis_finanzas_foreground' | head -20
           "$ANDROID_HOME/build-tools/35.0.0/aapt" dump resources Mis-Finanzas.apk | grep -q 'mipmap/mis_finanzas_launcher'
-      - name: Publicar APK en Releases
+      - name: Publicar paquetes en Releases
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="finanzas-v1.1.${{ github.run_number }}"
           if [ -n "$FINANZAS_KEYSTORE_B64" ]; then NOTE="APK firmado con clave persistente para actualizar futuras versiones. Primera instalación con esta clave requiere migración desde APK debug."; else NOTE="APK de prueba DEBUG. Android no podrá actualizar una instalación firmada con otra clave. No desinstales sin respaldo verificado."; fi
-          gh release create "$TAG" Mis-Finanzas.apk --title "Mis Finanzas $TAG" --notes "$NOTE" --prerelease --target "$GITHUB_SHA"
+          set -- Mis-Finanzas.apk
+          if [ -n "$FINANZAS_KEYSTORE_B64" ]; then
+            test -s Mis-Finanzas.aab
+            NOTE="$NOTE APK y AAB firmados con la misma clave. Pendiente de pruebas en dispositivo y revisión de Google Play."
+            set -- "$@" Mis-Finanzas.aab
+          fi
+          sha256sum "$@" > SHA256SUMS.txt
+          gh release create "$TAG" "$@" SHA256SUMS.txt --title "Mis Finanzas $TAG" --notes "$NOTE" --prerelease --target "$GITHUB_SHA"
