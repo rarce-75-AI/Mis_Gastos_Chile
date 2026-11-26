@@ -734,14 +734,4 @@ $('file').onchange=async function(e){
 };
 financeExpandRecurring();
 render();
-</script><script src="./statement-xlsx.js"></script><script src="./bank-import.js"></script><script src="./subscriptions.js"></script><script>
-/* Commercial edition: purchases remain disabled until native billing is connected. */
-(function(){
- const originalRender=render;
- const originalCsv=csv;
- function proInfo(){modal('<div class="row"><h2>Mis Finanzas PRO</h2><button class="closeX" onclick="dismissSheet()">×</button></div><p>Pago único, sin suscripción ni publicidad.</p><p>Importación bancaria, exportación y herramientas avanzadas.</p><p class="muted">Compras todavía no habilitadas. No se realizará ningún cobro.</p><button class="btn full" onclick="dismissSheet()">Volver</button>');}
- window.financeProInfo=proInfo;
- render=function(){originalRender();const header=document.querySelector('header');if(header&&!header.querySelector('[data-pro]')){const b=document.createElement('button');b.dataset.pro='1';b.className='btn';b.textContent='Conocer PRO';b.style.cssText='float:right;margin-top:-28px;font-size:12px';b.onclick=proInfo;header.appendChild(b);}};
- render();
-})();
-</script></body></html>
+</script><script src="./statement-xlsx.js"></script><script src="./bank-import.js"></script><script src="./subscriptions.js"></script><script src="./pro.js"></script></body></html>

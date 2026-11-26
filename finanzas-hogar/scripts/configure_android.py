@@ -22,3 +22,18 @@ if count != 1:
     raise SystemExit("No se encontró una única declaración versionName")
 path.write_text(source)
 print(f"Android API 36, versionCode={run}, versionName=1.2.{run}")
+
+# Native Play Billing bridge, generated with the Capacitor Android project.
+import shutil
+java_dir = Path("android/app/src/main/java/cl/rarce/finanzashogar")
+shutil.copyfile("native/FinanceBilling.java", java_dir / "FinanceBilling.java")
+activity = java_dir / "MainActivity.java"
+activity.write_text("""package cl.rarce.finanzashogar;
+import android.os.Bundle;
+import com.getcapacitor.BridgeActivity;
+public class MainActivity extends BridgeActivity {
+ @Override public void onCreate(Bundle state){registerPlugin(FinanceBilling.class);super.onCreate(state);}
+}
+""")
+with path.open("a") as f:
+    f.write("\\ndependencies { implementation 'com.android.billingclient:billing:7.1.1' }\\n".replace("\\\\n","\\n"))
