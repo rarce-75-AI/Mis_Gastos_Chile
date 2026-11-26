@@ -22,14 +22,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
       - name: Configurar Android SDK
         run: |
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-35" "build-tools;35.0.0"
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;35.0.0"
       - name: Preparar Capacitor
         run: |
           npm install
@@ -39,7 +39,7 @@ jobs:
           npx cap sync android
           python3 -m pip install --quiet cairosvg
           python3 scripts/generate_icons.py
-          sed -i -E "s/versionCode [0-9]+/versionCode $GITHUB_RUN_NUMBER/; s/versionName \"[^\"]+\"/versionName \"1.2.$GITHUB_RUN_NUMBER\"/" android/app/build.gradle
+          python3 scripts/configure_android.py
       - name: Compilar APK de prueba sin firma persistente
         if: env.FINANZAS_KEYSTORE_B64 == ''
         run: |
@@ -67,13 +67,14 @@ jobs:
           test -s Mis-Finanzas.apk
           "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging Mis-Finanzas.apk | grep -E '^package:|^application-label:|^application-icon-'
           "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging Mis-Finanzas.apk | grep -q "application-label:'Mis Finanzas'"
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging Mis-Finanzas.apk | grep -q "targetSdkVersion:'36'"
           "$ANDROID_HOME/build-tools/35.0.0/aapt" dump resources Mis-Finanzas.apk | grep -E 'mipmap/mis_finanzas_launcher|drawable/mis_finanzas_foreground' | head -20
           "$ANDROID_HOME/build-tools/35.0.0/aapt" dump resources Mis-Finanzas.apk | grep -q 'mipmap/mis_finanzas_launcher'
       - name: Publicar paquetes en Releases
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG="finanzas-v1.1.${{ github.run_number }}"
+          TAG="finanzas-v1.2.${{ github.run_number }}"
           if [ -n "$FINANZAS_KEYSTORE_B64" ]; then NOTE="APK firmado con clave persistente para actualizar futuras versiones. Primera instalación con esta clave requiere migración desde APK debug."; else NOTE="APK de prueba DEBUG. Android no podrá actualizar una instalación firmada con otra clave. No desinstales sin respaldo verificado."; fi
           set -- Mis-Finanzas.apk
           if [ -n "$FINANZAS_KEYSTORE_B64" ]; then
