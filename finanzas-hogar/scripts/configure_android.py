@@ -36,4 +36,4 @@ public class MainActivity extends BridgeActivity {
 }
 """)
 with path.open("a") as f:
-    f.write("\\ndependencies { implementation 'com.android.billingclient:billing:7.1.1' }\\n".replace("\\\\n","\\n"))
+    f.write("\ndependencies { implementation 'com.android.billingclient:billing:7.1.1' }\n")
