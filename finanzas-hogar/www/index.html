@@ -38,7 +38,7 @@ body{background:#0d1729}header{background:linear-gradient(115deg,#083f37,#0c2337
 .subRow .actions .btn{flex:1;min-width:90px;font-size:13px;padding:9px}
 #subForm input,#subForm select{font-size:16px}
 #subForm button[type=submit]{margin-top:20px}
-</style></head><body><header><strong>Mis Finanzas</strong><br><small>Tus finanzas, bajo control</small></header><main id="app"></main><nav id="nav"></nav><div class="overlay" id="overlay"><div class="sheet" id="sheet"></div></div><input type="file" id="file" accept=".json"><script>
+</style><style>.financeMovementTypes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:8px 0}.financeMovementTypes .btn{min-height:40px;padding:6px;font-size:12px}.financeMovementTypes .active{background:var(--accent);color:#fff;border-color:var(--accent)}</style></head><body><header><strong>Mis Finanzas</strong><br><small>Tus finanzas, bajo control</small></header><main id="app"></main><nav id="nav"></nav><div class="overlay" id="overlay"><div class="sheet" id="sheet"></div></div><input type="file" id="file" accept=".json"><script>
 'use strict';
 const financeIconPaths={"home":"M3 10l9-7 9 7v11h-6v-7H9v7H3z","calendar":"M3 5h18v16H3z M7 2v6 M17 2v6 M3 10h18","list":"M5 3h14v18H5z M8 8h8 M8 12h8 M8 16h8","chart":"M3 3v18h18 M7 16v-5 M12 16V7 M17 16V4","settings":"M12 3v3 M12 18v3 M3 12h3 M18 12h3 M5 5l2 2 M17 17l2 2 M5 19l2-2 M17 7l2-2 M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0","fuel":"M3 21h12 M5 21V3h9v18 M7 6h5v5H7z M14 13h3v5a2 2 0 0 0 4 0V9l-4-4","wifi":"M2 8q10-9 20 0 M5 12q7-6 14 0 M9 16q3-3 6 0 M12 20h.01","health":"M9 3h6v6h6v6h-6v6H9v-6H3V9h6z","car":"M3 16v-5l3-6h12l3 6v5H3z M5 16v3 M19 16v3 M3 11h18 M7 14h.01 M17 14h.01","school":"M3 21h18 M5 21V10l7-6 7 6v11 M10 21v-6h4v6 M8 11h.01 M16 11h.01","pill":"M5 19a5 5 0 0 1 0-7l7-7a5 5 0 0 1 7 7l-7 7a5 5 0 0 1-7 0 M9 9l6 6","parking":"M3 3h18v18H3z M9 17V7h4a3 3 0 0 1 0 6H9","cart":"M2 3h3l3 12h11l3-9H6 M9 20h.01 M18 20h.01","bolt":"M13 2L4 14h7l-1 8 10-12h-7z","water":"M12 2C9 7 5 11 5 15a7 7 0 0 0 14 0c0-4-4-8-7-13z","card":"M2 5h20v14H2z M2 10h20 M6 15h4","phone":"M7 2h10v20H7z M11 18h2","flame":"M12 2c2 6 7 8 7 13a7 7 0 0 1-14 0c0-4 3-7 5-9l2 5z","tv":"M3 5h18v13H3z M8 22h8","more":"M5 12h.01 M12 12h.01 M19 12h.01","food":"M5 3v7q3 4 6 0V3 M8 3v18 M18 3v18 M18 3q-5 5 0 10","wallet":"M3 5h17v15H3z M20 10h-6v5h6 M16 12h.01"};
 function financeSvg(k){return '<svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="'+(financeIconPaths[k]||financeIconPaths.more)+'"/></svg>'}
@@ -627,6 +627,7 @@ function financeRecent(){
 }
 summary=financeRecent;
 function financeGo(name){tab=name;render();}
+let financeListType='all';
 function financeHistory(){
   const q=financeListQuery.toLowerCase();
   let arr=db.items.filter(x=>x.type!=='bill').map(x=>({...x,entryId:x.id}));
@@ -635,6 +636,7 @@ function financeHistory(){
       note:'Abono · '+(x.note||x.category),paymentId:p.id,payments:[],receipt:p.receipt});
   }
   arr=arr.filter(x=>(!q||(x.category+' '+(x.note||'')+' '+x.amount).toLowerCase().includes(q))&&
+    (financeListType==='all'||x.type===financeListType)&&
     (financeListCategory==='Todas'||x.category===financeListCategory)&&
     (financeListMonth==='Todos'||String(x.date).slice(0,7)===financeListMonth));
   arr.sort((a,b)=>b.date.localeCompare(a.date));
@@ -644,7 +646,8 @@ function financeHistory(){
    '<div class="financeFilterRow"><select aria-label="Filtrar categoría" onchange="financeListCategory=this.value;historyLimit=80;render()">'+
    '<option value="Todas">Todas las categorías</option>'+Array.from(new Set(db.items.map(x=>x.category))).sort().map(c=>'<option value="'+esc(c)+'"'+(financeListCategory===c?' selected':'')+'>'+esc(c)+'</option>').join('')+'</select>'+
    '<input type="month" aria-label="Filtrar mes" value="'+(financeListMonth==='Todos'?'':financeListMonth)+'" onchange="financeListMonth=this.value||\'Todos\';historyLimit=80;render()"></div>'+
-   '<small class="muted">'+page.length+' de '+arr.length+' movimientos</small>'+
+   '<div class="financeMovementTypes" role="group" aria-label="Tipo de movimiento">'+[['all','Todos'],['income','Ingresos'],['expense','Gastos']].map(([v,label])=>'<button type="button" class="btn '+(financeListType===v?'active':'')+'" aria-pressed="'+(financeListType===v)+'" onclick="financeSetListType(\''+v+'\')">'+label+'</button>').join('')+'</div>'+
+   '<small class="muted">'+page.length+' de '+arr.length+' movimientos</small>'+(arr.length?'':'<p class="muted">No hay movimientos para estos filtros.</p>')+
    page.map(x=>'<div class="financeHistoryRow" data-finance-history="'+esc(x.entryId)+'"'+(x.paymentId?' data-finance-payment="'+esc(x.paymentId)+'"':'')+'>'+
      '<div class="line" onclick="'+(x.paymentId?'financeDetail(\''+esc(x.entryId)+'\')':'financeDetail(\''+esc(x.id)+'\')')+'"><div class="ico">'+financeCategoryIcon(x.category)+'</div>'+
      '<div class="detail"><strong>'+esc(x.category)+'</strong><small>'+esc(x.note||'')+' · '+financeDateText(x.date)+'</small></div>'+
@@ -652,6 +655,7 @@ function financeHistory(){
      (x.paymentId?'<button class="btn" onclick="financePaymentForm(\''+esc(x.entryId)+'\',\''+esc(x.paymentId)+'\')">Ver abono</button>':'')+'</div>').join('')+
    (arr.length>page.length?'<button class="btn full" onclick="moreHistory()">Mostrar más</button>':'')+'</section>';
 }
+function financeSetListType(v){financeListType=v;historyLimit=80;render();}
 function financeFilterSearch(q){
   financeListQuery=q;
   const cursor=q.length;
