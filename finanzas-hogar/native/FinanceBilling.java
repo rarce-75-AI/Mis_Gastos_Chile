@@ -10,6 +10,14 @@ public class FinanceBilling extends Plugin {
  private PluginCall pending;
  private ProductDetails product;
  private boolean owned=false;
+ private boolean reviewAccess(){return getContext().getSharedPreferences("finance_review",0).getBoolean("enabled",false);}
+ @PluginMethod public void review(PluginCall call){
+  String code=call.getString("code","");
+  if(!"KMR-Review-8f3c71d9a6e24b05".equals(code)){call.reject("Código incorrecto");return;}
+  getContext().getSharedPreferences("finance_review",0).edit().putBoolean("enabled",true).apply();
+  JSObject out=new JSObject();out.put("review",true);call.resolve(out);
+ }
+ @PluginMethod public void reviewStatus(PluginCall call){JSObject out=new JSObject();out.put("review",reviewAccess());call.resolve(out);}
  @Override public void load(){
   client=BillingClient.newBuilder(getContext()).enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build()).setListener((result,purchases)->{
    PluginCall call=pending;pending=null;
