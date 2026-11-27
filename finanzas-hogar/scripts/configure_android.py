@@ -36,7 +36,7 @@ public class MainActivity extends BridgeActivity {
  private boolean offered=false;
  private final com.google.android.play.core.install.InstallStateUpdatedListener listener=state->{if(state.installStatus()==com.google.android.play.core.install.model.InstallStatus.DOWNLOADED)runOnUiThread(this::restartOffer);};
  private void restartOffer(){if(isFinishing()||isDestroyed())return;new android.app.AlertDialog.Builder(this).setTitle("Actualización descargada").setMessage("Guarda tus cambios antes de reiniciar.").setPositiveButton("Actualizar",(d,w)->updates.completeUpdate()).setNegativeButton("Más tarde",null).show();}
- @Override protected void onResume(){super.onResume();if(updates==null)return;updates.getAppUpdateInfo().addOnSuccessListener(info->{
+ @Override public void onResume(){super.onResume();if(updates==null)return;updates.getAppUpdateInfo().addOnSuccessListener(info->{
  if(isFinishing()||isDestroyed())return;
  if(info.installStatus()==com.google.android.play.core.install.model.InstallStatus.DOWNLOADED){restartOffer();return;}
  int availability=info.updateAvailability();
@@ -49,7 +49,7 @@ public class MainActivity extends BridgeActivity {
  if(mode==0)dialog.setNegativeButton("Más tarde",null);else dialog.setCancelable(false);dialog.show();
  });}
  private void launchUpdate(com.google.android.play.core.appupdate.AppUpdateInfo info,int mode){try{updates.startUpdateFlowForResult(info,this,com.google.android.play.core.appupdate.AppUpdateOptions.newBuilder(mode).build(),804);}catch(Exception e){android.util.Log.w("FIN_UPDATE","Update unavailable",e);}}
- @Override protected void onDestroy(){if(updates!=null)updates.unregisterListener(listener);super.onDestroy();}
+ @Override public void onDestroy(){if(updates!=null)updates.unregisterListener(listener);super.onDestroy();}
 
  @Override public void onCreate(Bundle state){registerPlugin(FinanceBilling.class);super.onCreate(state);updates=com.google.android.play.core.appupdate.AppUpdateManagerFactory.create(this);updates.registerListener(listener);}
 }
