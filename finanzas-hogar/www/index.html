@@ -734,4 +734,44 @@ $('file').onchange=async function(e){
 };
 financeExpandRecurring();
 render();
-</script><script src="./statement-xlsx.js"></script><script src="./bank-import.js"></script><script src="./subscriptions.js"></script><script src="./pro.js"></script></body></html>
+</script><script src="./statement-xlsx.js"></script><script src="./bank-import.js"></script><script src="./subscriptions.js"></script><script>
+/* Theme preference is independent of financial data and PRO. */
+function financeThemeApply(){let light=false;try{light=localStorage.getItem('financeTheme')==='light';}catch(e){}document.documentElement.classList.toggle('finance-light',light);const b=document.querySelector('[data-theme-toggle]');if(b){b.textContent=light?'☾':'☀';b.setAttribute('aria-label',light?'Activar tema oscuro':'Activar tema claro');}}
+function financeToggleTheme(){try{localStorage.setItem('financeTheme',document.documentElement.classList.contains('finance-light')?'dark':'light');}catch(e){}financeThemeApply();}
+const themeStyle=document.createElement('style');themeStyle.textContent=`
+html.finance-light{color-scheme:light;--bg:#f1f5f4;--card:#fff;--line:#d6e2df;--mint:#08765a;--muted:#526477;--red:#b42336}
+.finance-light body{background:var(--bg);color:#17283a}
+.finance-light header{background:#e3f2ed;border-color:#c5ded5}
+.finance-light .card,.finance-light .statcard,.finance-light .sheet{background:#fff;border-color:#d6e2df;color:#17283a}
+.finance-light .balance{background:linear-gradient(135deg,#d6f4e7,#e3edf7)}
+.finance-light nav{background:#fff;border-color:#d6e2df;box-shadow:0 -4px 16px #14223915}
+.finance-light nav button.on{color:#08765a}
+.finance-light input,.finance-light select,.finance-light textarea{background:#f7faf9;color:#17283a;border-color:#b8cbc6}
+.finance-light .btn,.finance-light button,.finance-light .financeTypes button{background:#e0ebe8;color:#17283a;border-color:#c7d8d3}
+.finance-light .btn.primary,.finance-light .filters button.on,.finance-light .financeTypes button.selected{background:#08765a;color:white}
+.finance-light nav button{background:transparent;color:#526477}
+.finance-light .financeCheck{color:#17283a}
+.finance-light .tag{background:#e0ebe8;color:#17283a}
+.finance-light .tag.late,.finance-light .urgent{background:#fce4e6;color:#9b2432}
+.finance-light .primaryHero{background:#e0ebe8}
+.finance-light .primaryHero .plus{background:#c6e5db}
+.finance-light .progress{background:#d6e2df}
+.finance-light .plot span{background:#fff}
+header [data-theme-toggle]{position:absolute;left:10px;top:8px;min-width:44px;padding:6px;font-size:22px}
+header{position:relative}
+`;document.head.appendChild(themeStyle);
+const themeRender=render;render=function(){themeRender();const h=document.querySelector('header');if(h&&!h.querySelector('[data-theme-toggle]')){const b=document.createElement('button');b.dataset.themeToggle='1';b.onclick=financeToggleTheme;h.appendChild(b);}financeThemeApply();};render();
+
+
+/* Privacy on home: mask monetary amounts, including charts and recent movements. */
+let financeAmountsVisible=false;
+
+const financePrivacySummary=summary;
+summary=function(){const html=financePrivacySummary();return financeAmountsVisible?html:html.replace(/(?:\$|USD |EUR |CLP )\s*-?[\d.]+/g,'••••••');};
+function financeToggleAmounts(){financeAmountsVisible=!financeAmountsVisible;render();}
+const financePrivacyRender=render;
+render=function(){financePrivacyRender();const card=document.querySelector('.balance');if(!card)return;card.style.position='relative';const b=document.createElement('button');b.type='button';b.style.cssText='position:absolute;right:8px;top:8px;min-width:44px;padding:8px;background:transparent;color:inherit';b.setAttribute('aria-label',financeAmountsVisible?'Ocultar montos':'Mostrar montos');b.setAttribute('aria-pressed',String(financeAmountsVisible));b.innerHTML='<svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>'+(!financeAmountsVisible?'<path d="M3 3l18 18"/>':'')+'</svg>';b.onclick=financeToggleAmounts;card.appendChild(b);};
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&financeAmountsVisible){financeAmountsVisible=false;render();}});
+render();
+
+</script><script src="./pro.js"></script></body></html>
