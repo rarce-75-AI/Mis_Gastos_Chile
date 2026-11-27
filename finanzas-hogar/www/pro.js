@@ -52,3 +52,29 @@ const localBackupSettings=settings;settings=function(){return '<section class="c
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)financeLocalBackup();});
 financeLocalBackup();
 
+
+
+/* Genuine OOXML workbook, stored ZIP, no external service. */
+async function financeExportXlsx(){
+ if(!financeRequirePro())return;
+ try{
+ const enc=new TextEncoder(),xml=v=>String(v??'').replace(/[\x00-\x08\x0b\x0c\x0e-\x1f]/g,'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+ const rows=[['Fecha','Tipo','Categoría','Monto','Detalle','Vencimiento','Estado','Saldo']];
+ for(const x of db.items){rows.push([x.date,x.type,x.category,Number(x.amount)||0,x.note,x.due,state(x),x.type==='bill'?owed(x):'']);for(const p of x.payments||[])rows.push([p.date,'abono',x.category,Number(p.amount)||0,p.method,x.due,'','']);}
+ const sheet=rows.map((row,i)=>'<row r="'+(i+1)+'">'+row.map((v,j)=>{const ref=String.fromCharCode(65+j)+(i+1);return typeof v==='number'&&Number.isFinite(v)?'<c r="'+ref+'"><v>'+v+'</v></c>':'<c r="'+ref+'" t="inlineStr"><is><t xml:space="preserve">'+xml(v)+'</t></is></c>';}).join('')+'</row>').join('');
+ const files={
+ '[Content_Types].xml':'<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/></Types>',
+ '_rels/.rels':'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>',
+ 'xl/workbook.xml':'<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Movimientos" sheetId="1" r:id="rId1"/></sheets></workbook>',
+ 'xl/_rels/workbook.xml.rels':'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/></Relationships>',
+ 'xl/worksheets/sheet1.xml':'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"><cols><col min="1" max="8" width="20" customWidth="1"/></cols><sheetData>'+sheet+'</sheetData><autoFilter ref="A1:H'+rows.length+'"/></worksheet>'};
+ const parts=[],central=[];let offset=0,centralSize=0;
+ const header=n=>{const a=new Uint8Array(n),d=new DataView(a.buffer);return {a,u16:(o,v)=>d.setUint16(o,v,true),u32:(o,v)=>d.setUint32(o,v,true)};};
+ for(const [name,value] of Object.entries(files)){const n=enc.encode(name),b=enc.encode(value);let crc=0xffffffff;for(const v of b){crc^=v;for(let k=0;k<8;k++)crc=(crc>>>1)^((crc&1)?0xedb88320:0);}crc=(crc^0xffffffff)>>>0;
+ const h=header(30);h.u32(0,0x04034b50);h.u16(4,20);h.u16(12,33);h.u32(14,crc);h.u32(18,b.length);h.u32(22,b.length);h.u16(26,n.length);parts.push(h.a,n,b);
+ const c=header(46);c.u32(0,0x02014b50);c.u16(4,20);c.u16(6,20);c.u16(14,33);c.u32(16,crc);c.u32(20,b.length);c.u32(24,b.length);c.u16(28,n.length);c.u32(42,offset);central.push(c.a,n);centralSize+=46+n.length;offset+=30+n.length+b.length;}
+ const end=header(22);end.u32(0,0x06054b50);end.u16(8,central.length/2);end.u16(10,central.length/2);end.u32(12,centralSize);end.u32(16,offset);
+ const mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';await shareMobile('Mis_Finanzas_'+today()+'.xlsx',new Blob([...parts,...central,end.a],{type:mime}),mime);
+ }catch(e){financeNotify('No se pudo exportar Excel.',true);}
+}
+const xlsxSettings=settings;settings=function(){return '<section class="card"><h2>Excel (.xlsx)</h2><button class="btn primary full" onclick="financeExportXlsx()">Exportar Excel PRO</button></section>'+xlsxSettings();};
