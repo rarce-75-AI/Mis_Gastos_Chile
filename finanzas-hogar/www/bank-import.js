@@ -185,7 +185,10 @@ function bankSelectPage(value){
     if(!x.duplicate&&(x.kind==='expense'||x.kind==='income'))x.selected=value;
   });bankReview();
 }
+function bankProAllowed(){return typeof financeRequirePro==='function'&&financeRequirePro();}
+function bankOpen(){if(bankProAllowed())$('bankFile').click();}
 function bankImportConfirmed(){
+  if(!bankProAllowed())return;
   const included=bankPreview.filter(x=>x.selected&&(x.kind==='expense'||x.kind==='income'));
   if(!included.length){financeNotify('No seleccionaste movimientos para importar.',true);return;}
   if(!confirm('¿Incorporar '+included.length+' movimientos de '+bankFilename+'? Los movimientos existentes se conservarán.'))return;
@@ -213,6 +216,7 @@ function bankImportConfirmed(){
   financeNotify('Importados '+additions.length+' movimientos. Se conservaron los datos anteriores.');
 }
 async function bankHandleFile(event){
+  if(!bankProAllowed()){event.target.value='';return;}
   const file=event.target.files?.[0];if(!file)return;
   try{
     if(file.size>12*1024*1024)throw Error('El archivo supera 12 MB.');
@@ -228,12 +232,13 @@ async function bankHandleFile(event){
   finally{event.target.value='';}
 }
 function bankSettings(){
-  return '<section class="card"><h2>🏦 Cuenta bancaria principal</h2>'+
+  return '<section class="card"><h2>🏦 Cuenta bancaria principal · PRO</h2>'+
    (db.bankBalance?'<p>Último saldo informado por el banco: <strong>'+money(db.bankBalance.amount)+'</strong></p>'+
      '<small class="muted">Cartola '+financeDateText(db.bankBalance.date)+' · '+esc(db.bankBalance.filename||'')+'</small>':
      '<p class="muted">Importa la cartola de tu cuenta principal para registrar movimientos sin volver a digitarlos.</p>')+
    '<p class="muted">Compatible con Excel (.xlsx) y CSV con columnas Fecha, Descripción, Cargo, Abono y Saldo. La lectura se realiza en tu teléfono.</p>'+
-   '<button class="btn primary full" onclick="$(\'bankFile\').click()">Importar cartola bancaria</button>'+
+   '<details><summary>Cómo preparar tu Excel</summary><p>Usa una fila de encabezados con estas cinco columnas. Una operación por fila, fechas DD/MM/AAAA, montos positivos sin símbolos. Deja Cargo o Abono vacío o en cero según corresponda. Saldo es el saldo después de la operación.</p><div style="overflow-x:auto"><table style="font-size:11px;white-space:nowrap"><thead><tr><th>Fecha</th><th>Descripción</th><th>Cargo</th><th>Abono</th><th>Saldo</th></tr></thead><tbody><tr><td>01/11/2026</td><td>Sueldo</td><td>0</td><td>800000</td><td>800000</td></tr><tr><td>02/11/2026</td><td>Supermercado</td><td>35000</td><td>0</td><td>765000</td></tr></tbody></table></div><p class="muted">Guarda como .xlsx o CSV. No incluyas totales ni celdas combinadas en los movimientos.</p></details>'+ 
+   '<button class="btn primary full" onclick="bankOpen()">'+(typeof financePro!=='undefined'&&financePro?'Importar cartola bancaria':'Importar cartola bancaria · PRO')+'</button>'+
    '<input id="bankFile" type="file" accept=".xlsx,.csv,.txt" style="display:none" onchange="bankHandleFile(event)">'+
    '<small class="muted">Puedes revisar, clasificar y excluir movimientos antes de guardarlos. No se borrará ningún registro existente.</small></section>';
 }

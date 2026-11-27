@@ -147,6 +147,8 @@ check('CSV Chile interpretado con separador y montos CLP',()=>{
   assert.equal(parsed[1].kind,'transfer');
   assert.equal(parsed[1].selected,false);
 });
+check('Importación bloqueada sin PRO',()=>{const before=w.eval('db.items.length');w.bankImportConfirmed();assert.equal(w.eval('db.items.length'),before);});
+w.financeRequirePro=()=>true;
 check('Importa cargos sin contabilizar traspasos y conserva registros',()=>{
   const before=w.eval('db.items.length');
   w.bankImportConfirmed();
