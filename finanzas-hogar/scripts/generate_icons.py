@@ -20,7 +20,7 @@ drawable.mkdir(parents=True,exist_ok=True)
 cairosvg.svg2png(bytestring=foreground.encode(),write_to=str(drawable/'mis_finanzas_foreground.png'),output_width=432,output_height=432)
 values=root/'values'
 values.mkdir(parents=True,exist_ok=True)
-(values/'icon_background.xml').write_text('<resources><color name="finanzas_icon_background">#0B1729</color></resources>',encoding='utf-8')
+(values/'icon_background.xml').write_text('<resources><color name="finanzas_icon_background">#132634</color></resources>',encoding='utf-8')
 adaptive=root/'mipmap-anydpi-v26'
 adaptive.mkdir(parents=True,exist_ok=True)
 for name in ('mis_finanzas_launcher.xml','mis_finanzas_launcher_round.xml'):
