@@ -9,14 +9,14 @@ function check(t,fn){try{fn();console.log('OK '+t)}catch(e){console.error('FALLO
 check('Inicio carga sin errores',()=>{assert.equal(errs.length,0,errs.join('\n'));assert(d.querySelector('#nav button'));});
 check('Navegación a Cuentas',()=>{d.querySelector('[data-tab="cuentas"]').click();assert(d.querySelector('#app').textContent.includes('Cuentas por pagar'));});
 check('Abrir formulario de cuenta',()=>{d.querySelector('button[onclick*="openEntryForm"]').click();assert(d.querySelector('#overlay.on'));assert(d.querySelector('#amt'));assert(d.querySelector('#receiptPick'));});
-check('Guardar cuenta atrasada',()=>{d.querySelector('#amt').value='48000';d.querySelector('#due').value='2026-10-15';w.save();assert(!d.querySelector('#overlay.on'));assert(d.querySelector('#app').textContent.includes('48.000'));});
-check('Navegar a inicio',()=>{d.querySelector('[data-tab="inicio"]').click();assert(d.querySelector('#app').textContent.includes('Balance de ingresos y gastos del mes'));});
+check('Guardar cuenta atrasada',()=>{d.querySelector('#amt').value='48000';d.querySelector('#due').value='2026-10-15';w.save();assert(!d.querySelector('#overlay.on'));assert(!d.querySelector('#app').textContent.includes('48.000'));assert(d.querySelector('#app').textContent.includes('••••••'));assert(w.eval('db.items.some(x=>x.type==="bill"&&x.amount===48000)'));d.querySelector('header .financePrivacyToggle').click();assert(d.querySelector('#app').textContent.includes('48.000'));});
+check('Navegar a inicio',()=>{d.querySelector('[data-tab="inicio"]').click();assert(d.querySelector('#app').textContent.includes('Saldo del mes'));});
 
 check('Cerrar formulario con X',()=>{w.openEntryForm('bill');assert(d.querySelector('#overlay.on'));d.querySelector('#sheet .row button').click();assert(!d.querySelector('#overlay.on'));});
 check('Cerrar formulario con Atrás',()=>{w.openEntryForm('bill');assert(d.querySelector('#overlay.on'));w.backInApp();assert(!d.querySelector('#overlay.on'));});
 check('Cerrar formulario con Escape',()=>{w.openEntryForm('bill');d.dispatchEvent(new w.KeyboardEvent('keydown',{key:'Escape',bubbles:true,cancelable:true}));assert(!d.querySelector('#overlay.on'));});
 check('Ajustes sencillos sin presupuesto',()=>{d.querySelector('[data-tab="ajustes"]').click();assert(d.querySelector('#app').textContent.includes('Copias de seguridad'));assert(!d.querySelector('#app').textContent.includes('Guardar presupuesto'));});
-check('Volver a Inicio desde Ajustes',()=>{assert(w.backInApp());assert(d.querySelector('#app').textContent.includes('Balance de ingresos y gastos del mes'));});
+check('Volver a Inicio desde Ajustes',()=>{assert(w.backInApp());assert(d.querySelector('#app').textContent.includes('Saldo del mes'));});
 check('Opciones de recibos y formulario',()=>{w.openEntryForm('expense');assert(d.querySelector('#receiptPick').accept.includes('pdf'));assert(d.querySelector('#cat').options.length>5);w.dismissSheet();});
 check('Filtro de categorías para ingresos',()=>{w.openEntryForm('income');assert.equal(d.querySelector('#cat').value,'Sueldo');assert(!d.querySelector('#billfields').offsetParent||d.querySelector('#billfields').style.display==='none');w.dismissSheet();});
 check('Exportar desde Ajustes',()=>{d.querySelector('[data-tab="ajustes"]').click();assert(d.querySelector('#app').textContent.includes('Exportar para Excel'));assert(d.querySelector('#app').textContent.includes('Copias de seguridad'));});
@@ -58,7 +58,7 @@ check('Ingreso no ofrece cuentas de servicios',()=>{
 check('Cuenta pendiente se indica sin gasto negativo',()=>{
   d.querySelector('[data-tab="cuentas"]').click();
   const txt=d.querySelector('#app').textContent;
-  assert(txt.includes('Por pagar'));assert(txt.includes('48.000'));
+  assert(txt.includes('Por pagar'));assert(txt.includes('48.000'));assert.equal(w.eval('totals().expenses'),0);
 });
 check('No perder comprobante al editar',()=>{
   const x=w.eval('db.items.find(x=>x.type==="bill")');
@@ -214,3 +214,5 @@ check('Cartola coincide con suscripción y se excluye para evitar doble gasto',(
 });
 
 if(errs.length){console.error(errs.join('\n'));process.exitCode=1}
+
+check('Privacidad y gráfico accesibles',()=>{d.querySelector('[data-tab="estadisticas"]').click();assert(d.querySelector('.expenseDonut'));assert(d.querySelector('header .financePrivacyToggle'));if(w.eval('financeAmountsVisible'))d.querySelector('header .financePrivacyToggle').click();assert(d.querySelector('.expenseDonut').textContent.includes('••••••'));d.querySelector('header .financePrivacyToggle').click();assert(!d.querySelector('.expenseDonut').textContent.includes('••••••'));});
