@@ -1,0 +1,14 @@
+{
+  "functions": [
+    {
+      "source": ".",
+      "codebase": "finance-license",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase.json"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+# Mis Finanzas — servicio independiente
+
+Backend de verificación Google Play, aún no conectado al cliente. Requiere Android Publisher API habilitada, cuenta de servicio de ejecución autorizada en Play Console para esta aplicación, y secreto FINANCE_LICENSE_SIGNING_KEY con clave privada RSA PEM. Conservar la clave pública correspondiente para el cliente. No guardar claves en Git. Desplegar desde esta carpeta con `firebase deploy --only functions:finance-license --project kimora-apps`. No desplegar otras funciones. La licencia firmada vence en siete días; el cliente debe verificar firma, producto, paquete y vencimiento antes de usarla. Pendientes: App Check/limitación de abuso, integración cliente, pruebas de compra/reembolso y revisión de permisos.

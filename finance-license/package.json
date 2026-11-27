@@ -1,0 +1,12 @@
+{
+  "name": "kimora-finance-license",
+  "private": true,
+  "main": "index.js",
+  "engines": {
+    "node": "22"
+  },
+  "dependencies": {
+    "firebase-functions": "^6.0.0",
+    "google-auth-library": "^9.15.1"
+  }
+}
