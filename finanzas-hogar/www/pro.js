@@ -71,3 +71,16 @@ async function financeRestoreLocal(){
 const localBackupSettings=settings;settings=function(){return '<section class="card"><h2>Respaldo automático local</h2><p class="muted">Copia diaria al abrir la aplicación, hasta siete copias en el almacenamiento privado del teléfono. No se envían datos a internet. Si desinstalas la aplicación, estas copias pueden perderse: guarda también una copia manual fuera de la app.</p><button class="btn full" onclick="financeLocalBackup(true)">Crear respaldo local ahora</button><button class="btn full" onclick="financeRestoreLocal()">Recuperar último respaldo local</button></section>'+localBackupSettings();};
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)financeLocalBackup();});
 financeLocalBackup();
+
+/* Privacy on home: mask monetary amounts, including charts and recent movements. */
+let financeAmountsVisible=false;
+const financePrivacyMoney=money;
+let financePrivacyRendering=false;
+money=function(value){return financePrivacyRendering&&!financeAmountsVisible?'••••••':financePrivacyMoney(value);};
+const financePrivacySummary=summary;
+summary=function(){financePrivacyRendering=true;try{return financePrivacySummary();}finally{financePrivacyRendering=false;}};
+function financeToggleAmounts(){financeAmountsVisible=!financeAmountsVisible;render();}
+const financePrivacyRender=render;
+render=function(){financePrivacyRender();const card=document.querySelector('.balance');if(!card)return;card.style.position='relative';const b=document.createElement('button');b.type='button';b.style.cssText='position:absolute;right:8px;top:8px;min-width:44px;padding:8px;background:transparent;color:inherit';b.setAttribute('aria-label',financeAmountsVisible?'Ocultar montos':'Mostrar montos');b.setAttribute('aria-pressed',String(financeAmountsVisible));b.innerHTML='<svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>'+(!financeAmountsVisible?'<path d="M3 3l18 18"/>':'')+'</svg>';b.onclick=financeToggleAmounts;card.appendChild(b);};
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&financeAmountsVisible){financeAmountsVisible=false;render();}});
+render();
