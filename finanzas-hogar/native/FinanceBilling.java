@@ -10,6 +10,8 @@ public class FinanceBilling extends Plugin {
  private PluginCall pending;
  private ProductDetails product;
  private boolean owned=false;
+ private void saveOwned(boolean value){owned=value;getContext().getSharedPreferences("finance_billing",0).edit().putBoolean("owned",value).apply();}
+ @PluginMethod public void cachedStatus(PluginCall call){JSObject out=new JSObject();out.put("owned",getContext().getSharedPreferences("finance_billing",0).getBoolean("owned",false));call.resolve(out);}
  private boolean reviewAccess(){return getContext().getSharedPreferences("finance_review",0).getBoolean("enabled",false);}
  @PluginMethod public void review(PluginCall call){
   String code=call.getString("code","");
@@ -35,11 +37,12 @@ public class FinanceBilling extends Plugin {
  private void refresh(PluginCall call){
   client.queryPurchasesAsync(QueryPurchasesParams.newBuilder().setProductType(BillingClient.ProductType.INAPP).build(),(r,ps)->{
    if(r.getResponseCode()!=0){if(call!=null)call.reject(r.getDebugMessage());return;}
-   owned=false;
+   boolean found=false;
    for(Purchase p:ps){if(p.getProducts().contains(SKU)&&p.getPurchaseState()==Purchase.PurchaseState.PURCHASED){
-    if(p.isAcknowledged())owned=true;
-    else {client.acknowledgePurchase(AcknowledgePurchaseParams.newBuilder().setPurchaseToken(p.getPurchaseToken()).build(),a->{if(a.getResponseCode()==0){owned=true;queryProduct(call,false);}else if(call!=null)call.reject(a.getDebugMessage());});return;}
+    if(p.isAcknowledged()){found=true;}
+    else {client.acknowledgePurchase(AcknowledgePurchaseParams.newBuilder().setPurchaseToken(p.getPurchaseToken()).build(),a->{if(a.getResponseCode()==0){saveOwned(true);queryProduct(call,false);}else if(call!=null)call.reject(a.getDebugMessage());});return;}
    }}
+   saveOwned(found);
    queryProduct(call,false);
   });
  }
