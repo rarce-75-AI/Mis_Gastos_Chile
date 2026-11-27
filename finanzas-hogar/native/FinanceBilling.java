@@ -38,7 +38,7 @@ public class FinanceBilling extends Plugin {
  private void queryProduct(PluginCall call,boolean buy){
   QueryProductDetailsParams.Product p=QueryProductDetailsParams.Product.newBuilder().setProductId(SKU).setProductType(BillingClient.ProductType.INAPP).build();
   client.queryProductDetailsAsync(QueryProductDetailsParams.newBuilder().setProductList(Collections.singletonList(p)).build(),(r,details)->{
-   product=details.isEmpty()?null:details.get(0);
+   product=details.getProductDetailsList().isEmpty()?null:details.getProductDetailsList().get(0);
    if(buy){
     if(product==null){call.reject("Producto no disponible en Google Play");return;}
     getActivity().runOnUiThread(()->{pending=call;BillingResult result=client.launchBillingFlow(getActivity(),BillingFlowParams.newBuilder().setProductDetailsParamsList(Collections.singletonList(BillingFlowParams.ProductDetailsParams.newBuilder().setProductDetails(product).build())).build());if(result.getResponseCode()!=0){pending=null;call.reject(result.getDebugMessage());}});
