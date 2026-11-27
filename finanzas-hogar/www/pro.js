@@ -41,3 +41,33 @@ header [data-theme-toggle]{position:absolute;left:10px;top:8px;min-width:44px;pa
 header{position:relative}
 `;document.head.appendChild(themeStyle);
 const themeRender=render;render=function(){themeRender();const h=document.querySelector('header');if(h&&!h.querySelector('[data-theme-toggle]')){const b=document.createElement('button');b.dataset.themeToggle='1';b.onclick=financeToggleTheme;h.appendChild(b);}financeThemeApply();};render();
+
+/* Local-only rotating backups. Private app storage; manual export remains available. */
+let localBackupBusy=false;
+const localBackupFS=()=>window.Capacitor?.isNativePlatform?.()?window.Capacitor.registerPlugin('Filesystem'):null;
+async function financeLocalBackup(force=false){
+ const fs=localBackupFS();if(!fs||localBackupBusy)return;
+ const stamp=today();if(!force&&localStorage.getItem('financeLastBackup')===stamp)return;
+ localBackupBusy=true;
+ try{
+  const snapshot=JSON.parse(JSON.stringify(db)),attachments={};
+  for(const key of financeBackupFileKeys()){const blob=await receiptRead(key);if(!blob)throw Error('Comprobante no disponible');attachments[key]=await blobDataUrl(blob);}
+  const slot=new Date().getDay();
+  await fs.writeFile({path:'local-backups/day-'+slot+'.json',directory:'DATA',encoding:'utf8',recursive:true,data:JSON.stringify({schema:4,data:snapshot,attachments,createdAt:new Date().toISOString()})});
+  localStorage.setItem('financeLastBackup',stamp);
+  if(force)financeNotify('Respaldo local guardado.');
+ }catch(e){console.warn('Local backup failed',e);if(force)financeNotify('No se pudo guardar el respaldo local.',true);}
+ finally{localBackupBusy=false;}
+}
+async function financeRestoreLocal(){
+ const fs=localBackupFS();if(!fs){financeNotify('Disponible en Android.',true);return;}
+ const copies=[];
+ for(let i=0;i<7;i++){try{const f=await fs.readFile({path:'local-backups/day-'+i+'.json',directory:'DATA',encoding:'utf8'});const v=JSON.parse(f.data);if(Array.isArray(v.data?.items))copies.push(v);}catch(e){}}
+ copies.sort((a,b)=>String(b.createdAt).localeCompare(String(a.createdAt)));
+ if(!copies.length){financeNotify('No hay respaldos locales disponibles.',true);return;}
+ const v=copies[0];if(!confirm('Recuperar respaldo del '+new Date(v.createdAt).toLocaleString()+'? Se reemplazarán los registros actuales.'))return;
+ try{for(const key of Object.keys(v.attachments||{}))await receiptStore(key,dataUrlBlob(v.attachments[key]));db=v.data;persist();queueReminderSync();render();financeNotify('Respaldo local recuperado.');}catch(e){financeNotify('No se pudo recuperar el respaldo.',true);}
+}
+const localBackupSettings=settings;settings=function(){return '<section class="card"><h2>Respaldo automático local</h2><p class="muted">Copia diaria al abrir la aplicación, hasta siete copias en el almacenamiento privado del teléfono. No se envían datos a internet. Si desinstalas la aplicación, estas copias pueden perderse: guarda también una copia manual fuera de la app.</p><button class="btn full" onclick="financeLocalBackup(true)">Crear respaldo local ahora</button><button class="btn full" onclick="financeRestoreLocal()">Recuperar último respaldo local</button></section>'+localBackupSettings();};
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)financeLocalBackup();});
+financeLocalBackup();
