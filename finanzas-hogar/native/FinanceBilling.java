@@ -30,7 +30,7 @@ public class FinanceBilling extends Plugin {
    owned=false;
    for(Purchase p:ps){if(p.getProducts().contains(SKU)&&p.getPurchaseState()==Purchase.PurchaseState.PURCHASED){
     if(p.isAcknowledged())owned=true;
-    else {client.acknowledgePurchase(AcknowledgePurchaseParams.newBuilder().setPurchaseToken(p.getPurchaseToken()).build(),a->{if(a.getResponseCode()==0){owned=true;}});}
+    else {client.acknowledgePurchase(AcknowledgePurchaseParams.newBuilder().setPurchaseToken(p.getPurchaseToken()).build(),a->{if(a.getResponseCode()==0){owned=true;queryProduct(call,false);}else if(call!=null)call.reject(a.getDebugMessage());});return;}
    }}
    queryProduct(call,false);
   });
@@ -41,7 +41,11 @@ public class FinanceBilling extends Plugin {
    product=details.getProductDetailsList().isEmpty()?null:details.getProductDetailsList().get(0);
    if(buy){
     if(product==null){call.reject("Producto no disponible en Google Play");return;}
-    getActivity().runOnUiThread(()->{pending=call;BillingResult result=client.launchBillingFlow(getActivity(),BillingFlowParams.newBuilder().setProductDetailsParamsList(Collections.singletonList(BillingFlowParams.ProductDetailsParams.newBuilder().setProductDetails(product).build())).build());if(result.getResponseCode()!=0){pending=null;call.reject(result.getDebugMessage());}});
+    BillingFlowParams.ProductDetailsParams.Builder offer=BillingFlowParams.ProductDetailsParams.newBuilder().setProductDetails(product);
+    ProductDetails.OneTimePurchaseOfferDetails detailsOffer=product.getOneTimePurchaseOfferDetails();
+    if(detailsOffer==null){call.reject("Oferta no disponible");return;}
+    String token=detailsOffer.getOfferToken();if(token!=null&&!token.isEmpty())offer.setOfferToken(token);
+    getActivity().runOnUiThread(()->{if(pending!=null){call.reject("Compra en curso");return;}pending=call;BillingResult result=client.launchBillingFlow(getActivity(),BillingFlowParams.newBuilder().setProductDetailsParamsList(Collections.singletonList(offer.build())).build());if(result.getResponseCode()!=0){pending=null;call.reject(result.getDebugMessage());}});
    }else if(call!=null){JSObject out=new JSObject();out.put("owned",owned);out.put("price",product!=null&&product.getOneTimePurchaseOfferDetails()!=null?product.getOneTimePurchaseOfferDetails().getFormattedPrice():"");call.resolve(out);}
   });
  }
