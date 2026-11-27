@@ -40,7 +40,7 @@ body{background:#0d1729}header{background:linear-gradient(115deg,#083f37,#0c2337
 #subForm button[type=submit]{margin-top:20px}
 </style></head><body><header><strong>Mis Finanzas</strong><br><small>Tus finanzas, bajo control</small></header><main id="app"></main><nav id="nav"></nav><div class="overlay" id="overlay"><div class="sheet" id="sheet"></div></div><input type="file" id="file" accept=".json"><script>
 'use strict';
-const KEY='mis_gastos_chile_capacitor_v2',cats=['Luz','Agua','Gas','Internet','Plan celular','Arriendo','Dividendo','Contribuciones','Bencina','Diésel','Parafina','Supermercado','Alimentación','Transporte','Salud','Educación','Crédito','Tarjeta','Otros'],icons={'Luz':'⚡','Agua':'💧','Gas':'🔥','Internet':'🌐','Plan celular':'📱','Bencina':'⛽','Diésel':'⛽','Parafina':'🛢️','Supermercado':'🛒','Sueldo':'💰'},groups=['Servicios','Alimentación','Transporte','Vivienda','Otros'],colors=['#539dff','#46dba5','#ad95f8','#f1b26c','#ff8791'];
+const KEY='mis_gastos_chile_capacitor_v2',cats=['Luz','Agua','Gas','Internet','Plan celular','Arriendo','Dividendo','Contribuciones','Bencina','Diésel','Parafina','Supermercado','Alimentación','Transporte','Salud','Educación','Crédito','Tarjeta','Otros'],icons={'Luz':'⚡','Agua':'💧','Gas':'🔥','Internet':'🌐','Plan celular':'📱','Bencina':'⛽','Diésel':'⛽','Parafina':'🛢️','Supermercado':'🛒','Sueldo':'💰'},groups=['Servicios','Alimentación','Transporte','Vivienda','Otros'],colors=['#729bc6','#80b5a9','#a6a0c2','#c7ab83','#c68d98'];
 const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'),today=()=>iso(new Date()),id=()=>Date.now()+'-'+Math.random().toString(36).slice(2),money=n=>(db.currency==='CLP'?'$':db.currency+' ')+Math.round(n||0).toLocaleString('es-CL'),paid=x=>(x.payments||[]).reduce((a,p)=>a+Number(p.amount||0),0),owed=x=>Math.max(0,x.amount-paid(x)),state=x=>x.type!=='bill'?'':owed(x)===0?'Pagada':x.due<today()?'Vencida':'Pendiente',group=c=>['Luz','Agua','Gas','Internet','Plan celular'].includes(c)?0:['Supermercado','Alimentación'].includes(c)?1:['Bencina','Diésel','Parafina','Transporte'].includes(c)?2:['Arriendo','Dividendo','Contribuciones'].includes(c)?3:4;
 let db={budget:0,currency:'CLP',items:[]},tab='inicio',filter='Pendientes',month=new Date(new Date().getFullYear(),new Date().getMonth(),1),editing=null;
 try{const saved=JSON.parse(localStorage.getItem(KEY));if(saved&&Array.isArray(saved.items))db=saved}catch(e){}
@@ -770,8 +770,35 @@ const financePrivacySummary=summary;
 summary=function(){const html=financePrivacySummary();return financeAmountsVisible?html:html.replace(/(?:\$|USD |EUR |CLP )\s*-?[\d.]+/g,'••••••');};
 function financeToggleAmounts(){financeAmountsVisible=!financeAmountsVisible;render();}
 const financePrivacyRender=render;
-render=function(){financePrivacyRender();const card=document.querySelector('.balance');if(!card)return;card.style.position='relative';const b=document.createElement('button');b.type='button';b.style.cssText='position:absolute;right:8px;top:8px;min-width:44px;padding:8px;background:transparent;color:inherit';b.setAttribute('aria-label',financeAmountsVisible?'Ocultar montos':'Mostrar montos');b.setAttribute('aria-pressed',String(financeAmountsVisible));b.innerHTML='<svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>'+(!financeAmountsVisible?'<path d="M3 3l18 18"/>':'')+'</svg>';b.onclick=financeToggleAmounts;card.appendChild(b);};
+render=function(){financePrivacyRender();const card=document.querySelector('.balance');if(!card)return;card.style.position='relative';const b=document.createElement('button');b.type='button';b.className='financePrivacyToggle';b.setAttribute('aria-label',financeAmountsVisible?'Ocultar montos':'Mostrar montos');b.setAttribute('aria-pressed',String(financeAmountsVisible));b.innerHTML='<svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>'+(!financeAmountsVisible?'<path d="M3 3l18 18"/>':'')+'</svg>';b.insertAdjacentText('beforeend',financeAmountsVisible?'Ocultar montos':'Mostrar montos');b.onclick=financeToggleAmounts;const grid=card.querySelector('.statgrid');card.insertBefore(b,grid||null);};
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&financeAmountsVisible){financeAmountsVisible=false;render();}});
 render();
 
-</script><script src="./pro.js"></script></body></html>
+</script><style>
+html:root{--bg:#131e2b;--card:#202e3e;--line:#39495a;--mint:#8bc6b4;--muted:#b4c1cf;--red:#e6a0a2;--accent:#527aa4;--control:#34465b;--ink:#f0f4f8}
+html.finance-light{--bg:#eef2f6;--card:#ffffff;--line:#d6dfe8;--mint:#347b68;--muted:#526477;--red:#a43c49;--accent:#365e89;--control:#e4ebf3;--ink:#23364b}
+html body{background:var(--bg);color:var(--ink)}
+html header{background:var(--card);border-color:var(--line);display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px 12px;padding:16px 14px 12px}
+header strong{flex-basis:100%;font-size:21px}header br{display:none}header small{flex-basis:100%}
+html header [data-theme-toggle],html header [data-pro]{position:static!important;float:none!important;margin:4px 0 0!important;font-size:13px!important;padding:8px 14px;min-height:40px}
+html .card,html .sheet,html .statcard{background:var(--card);border:1px solid var(--line);color:var(--ink);box-shadow:none}
+html .balance{background:var(--card);padding:20px 14px}
+html .balance .big{color:var(--ink);margin:10px 0 8px;font-weight:700}
+html .financePrivacyToggle{display:flex;align-items:center;justify-content:center;gap:9px;margin:0 auto 16px;padding:8px 15px;background:var(--control);color:var(--ink);border:1px solid var(--line);font-size:13px;border-radius:9px}
+html .statgrid{margin-top:0;gap:8px}
+html .statcard{background:var(--bg);padding:12px 8px;gap:6px}
+html .statcard strong{white-space:normal;overflow-wrap:anywhere;font-size:clamp(12px,3.7vw,16px)}
+html .statcard .statIcon{background:transparent;color:var(--mint)}
+html .statcard.out .statIcon{background:transparent;color:var(--red)}
+html button,html .btn{background:var(--control);color:var(--ink);border:1px solid transparent;white-space:normal;overflow-wrap:anywhere}
+html .btn.primary,html .filters button.on,html .financeTypes button.selected{background:var(--accent);color:#fff;border-color:transparent}
+html .primaryHero{background:var(--control)}html .primaryHero .plus{background:var(--accent);color:white}
+html nav{background:var(--card);border-color:var(--line);box-shadow:0 -4px 12px #0001}
+html nav button{background:transparent;color:var(--muted);border:0}html nav button.on{color:var(--ink);background:var(--control);border-radius:10px}
+html input,html select,html textarea{background:var(--bg);color:var(--ink);border-color:var(--line)}
+html .urgent{background:var(--bg);border:1px solid var(--line)}html .tag{background:var(--control);color:var(--ink)}
+html .tag.late{color:var(--red)}html .financeCheck{color:var(--ink)}html .subRow small,html .financePaymentRow small{color:var(--muted)}
+html .plot span{background:var(--card)}html .progress{background:var(--line)}
+html .subscriptionCard>.row{display:flex;flex-direction:column;align-items:stretch;gap:8px}
+html .subscriptionCard>.row h2{margin:0}html .subscriptionCard>.row button{width:100%;min-width:0}
+</style><script src="./pro.js"></script></body></html>

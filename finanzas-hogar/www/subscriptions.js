@@ -136,7 +136,7 @@ function subToggle(key){
 }
 const subBaseAccounts=accounts;
 accounts=function(){
-  return '<section class="card"><div class="row"><h2>Suscripciones y gastos fijos</h2><button class="btn primary" onclick="subManage()">Administrar</button></div>'+
+  return '<section class="card subscriptionCard"><div class="row"><h2>Suscripciones y gastos fijos</h2><button class="btn primary" onclick="subManage()">Administrar</button></div>'+
     '<p class="muted">Netflix, Spotify, Max, Disney+, ChatGPT, Amazon Prime, Google One y otras.</p>'+
     '<button class="btn full" onclick="subForm()">＋ Nueva suscripción</button></section>'+subBaseAccounts();
 };
