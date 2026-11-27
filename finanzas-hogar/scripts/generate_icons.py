@@ -12,15 +12,13 @@ for dpi,size in [('mdpi',48),('hdpi',72),('xhdpi',96),('xxhdpi',144),('xxxhdpi',
         cairosvg.svg2png(bytestring=svg.encode(),write_to=str(folder/name),output_width=size,output_height=size)
 
 # Iconos adaptativos: fondo separado y motivo dentro de la zona segura Android
-foreground=svg.replace('<rect width="512" height="512" rx="100" fill="url(#bg)"/>','')
-foreground=foreground.replace('<path d="M82 238', '<g transform="translate(63 63) scale(.755)"><path d="M82 238')
-foreground=foreground.replace('</svg>','</g></svg>')
+foreground=svg[:svg.index('<rect width="512"')]+ '<g transform="translate(63 63) scale(.755)">'+svg[svg.index('<g id="motif"'):].replace('</svg>','</g></svg>')
 drawable=root/'drawable'
 drawable.mkdir(parents=True,exist_ok=True)
 cairosvg.svg2png(bytestring=foreground.encode(),write_to=str(drawable/'mis_finanzas_foreground.png'),output_width=432,output_height=432)
 values=root/'values'
 values.mkdir(parents=True,exist_ok=True)
-(values/'icon_background.xml').write_text('<resources><color name="finanzas_icon_background">#132634</color></resources>',encoding='utf-8')
+(values/'icon_background.xml').write_text('<resources><color name="finanzas_icon_background">#03182e</color></resources>',encoding='utf-8')
 adaptive=root/'mipmap-anydpi-v26'
 adaptive.mkdir(parents=True,exist_ok=True)
 for name in ('mis_finanzas_launcher.xml','mis_finanzas_launcher_round.xml'):
